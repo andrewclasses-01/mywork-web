@@ -2,7 +2,7 @@
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>myWork</title>
 <!-- (v2.4.1) logo kiểu B: tab trình duyệt + màn hình chính điện thoại (vẽ bằng tools/tao-icon.ps1) -->
 <link rel="icon" type="image/svg+xml" href="logo.svg">
@@ -782,6 +782,8 @@ html[data-dir=right]::view-transition-new(mbody){animation:.4s var(--ease) both 
 .notep>[contenteditable]{flex:1;min-height:96px;outline:none}
 /* ================= v2.0.0 — APP THẬT: phủ kín cửa sổ, màn đăng nhập thật ================= */
 html,body{height:100%;overflow:hidden}
+/* (v2.5.1) app, KHONG phai trang web: chi cho cuon, cam chum 2 ngon phong to + cham 2 lan phong to */
+html,body{touch-action:pan-x pan-y}
 body{min-height:0}
 .stage{padding:0;height:100vh;display:block}
 .frame{max-width:none;width:100vw;height:100vh;border-radius:0;box-shadow:none}
@@ -2361,6 +2363,9 @@ addEventListener('beforeunload',()=>{try{if(!S.loggedOut)window.KHO.luu();}catch
 /* qua nửa đêm: tải lại để "Hôm nay / Ngày của tôi" sang ngày mới (phiên đăng nhập vẫn giữ trong cửa sổ) */
 setInterval(()=>{if(ymd(new Date())!==TODAY&&!frame.querySelector(':focus'))location.reload();},60000);
 /* phép thử tự động (Claude): đăng nhập bằng vé TÀI KHOẢN THỬ ZTEST — không dùng mật khẩu thật */
+/* (v2.5.1) iPhone bo qua user-scalable=no o Safari => chan them cu chi chum 2 ngon (gesture*) va vuot 2 ngon */
+['gesturestart','gesturechange','gestureend'].forEach(ev=>document.addEventListener(ev,e=>e.preventDefault(),{passive:false}));
+document.addEventListener('touchmove',e=>{if(e.touches&&e.touches.length>1)e.preventDefault();},{passive:false});
 window.__thu=tok=>S.dangVao?Promise.resolve():window.KHO.thuToken(tok).then(batDau);
 if(window.mywork){window.mywork.getVersion().then(v=>S.ver=v).catch(()=>{});if(window.mywork.getAutostart)window.mywork.getAutostart().then(v=>S.autoMin=v).catch(()=>{});}
 shell();loginFocus();

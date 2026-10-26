@@ -91,7 +91,7 @@
 /* thẻ chỉ số */
 .t-card{border:1px solid var(--li);border-radius:14px;padding:14px 16px;margin-top:18px;background:var(--t-bg)}
 .t-card h3{font-size:14px;font-weight:700;margin-bottom:10px;display:flex;align-items:center;gap:8px}
-.t-card h3 .t-s{font-weight:400;font-size:12px;color:var(--mu)}
+.t-card h3 .t-s{font-weight:500;font-size:12px;color:var(--mu)}
 .t-ms h3{margin-bottom:2px}
 .t-mgrid{display:grid;grid-template-columns:1fr 1fr;column-gap:28px}
 .t-mrow{display:grid;grid-template-columns:22px 1fr 76px 34px;align-items:center;gap:10px;min-height:48px;border-bottom:1px solid var(--t-line);cursor:text}
@@ -258,3 +258,21 @@
 .dk .t-tip{background:#3a2e12;color:#f5c66b}
 .dk .t-wake.on{background:#3a2e12}
 .dk .t-cell.fut{color:#5b6168}
+/* ================= v2.5.0 ================= */
+/* hình động trong "Cách tập" */
+.t-fig{color:var(--ac);background:var(--t-bg);border:1px solid var(--li);border-radius:12px;margin:8px 0 10px;max-width:360px}
+.t-fig svg{display:block;width:100%;height:auto}
+/* hỏi lại ô số (lệch xa lần trước / số sai) */
+.t-hoi{grid-column:1 / -1;display:flex;align-items:center;gap:8px;flex-wrap:wrap;background:#fff7e6;border-radius:10px;padding:8px 10px;margin:4px 0 8px;font-size:13px;color:#8a5a00;font-weight:600}
+.t-hoi b{font-weight:800}
+.t-hoi button{padding:6px 12px;border-radius:8px;background:#fff;border:1.5px solid #f0d49b;font-weight:700;font-size:12.5px}
+.t-hoi button.ok{background:#d97706;border-color:#d97706;color:#fff;margin-left:auto}
+.dk .t-hoi{background:#3a2e12;color:#f5c66b}
+/* chiều cao sửa tại chỗ (Hồ sơ) */
+.t-kvin{display:flex;align-items:center;gap:6px}
+.t-kvin .t-num{width:76px;text-align:right;border-color:transparent;background:var(--t-soft);font-weight:700;padding:5px 8px}
+/* thẻ nằm ở thanh dưới của app (điện thoại) ⇒ ẩn thanh riêng, hạ đồng hồ nghỉ */
+.tp.ngoainav .t-pnav{display:none!important}
+.tp.phone.ngoainav .t-rest{bottom:14px}
+.tp.phone.ngoainav .t-body{padding-bottom:40px}
+.t-ch .ax{font-weight:600}

@@ -11,14 +11,15 @@
 <meta name="theme-color" content="#0E7C6E">
 <meta name="apple-mobile-web-app-title" content="myWork">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700;800&display=swap" rel="stylesheet">
 <script src="vendor/Sortable.min.js"></script>
 <link rel="stylesheet" href="mylink/mylink.css">
 <link rel="stylesheet" href="tap/tap.css">
+<link rel="stylesheet" href="nhac/nhac.css">
 <style>
 :root{--ac:#0E7C6E;--ac2:#0b6a5e;--acl:#e7f5f2;--acm:#b9e3da;--tx:#1e293b;--mu:#64748b;--li:#eef0f4;--sb:#fafbfb}
 *{box-sizing:border-box;margin:0;padding:0}
-body{background:#e6ebea;font-family:Inter,'Segoe UI',sans-serif;color:var(--tx);min-height:100vh}
+body{background:#e6ebea;font-family:Inter,'Segoe UI',sans-serif;font-weight:500;color:var(--tx);min-height:100vh}
 button{font:inherit;cursor:pointer;border:0;background:none;color:inherit}
 input{font:inherit;color:inherit}
 svg.i{width:18px;height:18px;flex:none;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
@@ -43,7 +44,7 @@ svg.i{width:18px;height:18px;flex:none;fill:none;stroke:currentColor;stroke-widt
 .brand{display:flex;align-items:center;gap:9px;padding:4px 8px 14px;font-weight:700;font-size:16px}
 .brand .lg{width:28px;height:28px;flex:none;display:block}   /* (v2.4.1) logo tròn kiểu B = web/logo.svg */
 .srch{display:flex;align-items:center;gap:8px;margin:0 2px 12px;padding:8px 10px;border-radius:10px;background:#f0f3f2;color:#94a3b8;font-size:13px}
-.srch kbd{margin-left:auto;font:11px Inter;background:#fff;border:1px solid #e2e8f0;border-radius:5px;padding:1px 5px}
+.srch kbd{margin-left:auto;font:500 11px Inter;background:#fff;border:1px solid #e2e8f0;border-radius:5px;padding:1px 5px}
 .nav{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:9px;font-size:14px;color:#334155;width:100%;text-align:left}
 .nav:hover{background:#eef2f1}
 .nav.on{background:var(--acl);color:var(--ac2);font-weight:600}
@@ -257,10 +258,10 @@ body{background:#eceff0}
 .nav svg.i{color:#80868b;width:17px;height:17px}
 .nav.on{background:#e8f3f1;color:var(--ac2);font-weight:500}
 .nav.on svg.i{color:var(--ac)}
-.nav .n{color:#b0b5ba;font-weight:400}
+.nav .n{color:#b0b5ba;font-weight:500}
 .nav .dot{width:8px;height:8px;border-radius:50%;margin:0 4.5px}
 .sep{height:1px;background:#eeeff0;margin:10px 8px}
-.newl{color:#80868b;font-weight:400;padding:7px 10px;gap:12px}
+.newl{color:#80868b;font-weight:500;padding:7px 10px;gap:12px}
 .newl svg.i{width:17px;height:17px}
 .cap{text-transform:none;letter-spacing:0;font-size:12.5px;font-weight:500;color:#9aa0a6;padding:16px 10px 4px;cursor:pointer;gap:6px}
 .cap .car{font-size:10px;transition:transform .2s;display:inline-block}
@@ -294,7 +295,7 @@ body{background:#eceff0}
 .row:hover{background:#fafbfb}
 .row.sel{background:#f0f8f6;border-color:#f0f8f6;border-radius:8px}
 .ck{width:19px;height:19px;border-width:1.6px}
-.tt b{font-weight:400;font-size:14.5px;color:#202124}
+.tt b{font-weight:500;font-size:14.5px;color:#202124}
 .due{font-size:12.5px;color:#9aa0a6;white-space:nowrap}
 .due.over{color:#d93025}.due.today{color:var(--ac)}
 .star{opacity:0;transition:opacity .15s}
@@ -311,7 +312,7 @@ body{background:#eceff0}
 .sdot.p-todo{color:#b0b5ba}.sdot.p-doing{color:#2b8bd6}.sdot.p-wait{color:#e0a000}.sdot.p-done{color:#2f9e5a}
 .sdot[class*="p-"]{background:currentColor}
 .kc{border-color:#eceeef;box-shadow:none;padding:10px 12px;display:flex;flex-direction:column;gap:6px;border-left:3px solid var(--lc,#ddd)}
-.kc b{margin:0;font-weight:400}
+.kc b{margin:0;font-weight:500}
 .kc .due{align-self:flex-start}
 /* lịch nhẹ hơn */
 .cal .ev{box-shadow:none;background:#f6f7f7;border-left-width:2px}
@@ -407,7 +408,7 @@ body{background:#eceff0}
 .cmdk{position:absolute;left:50%;top:90px;transform:translateX(-50%);width:min(600px,calc(100% - 24px));background:#fff;border-radius:14px;box-shadow:0 24px 60px rgba(0,0,0,.22);z-index:41;overflow:hidden;animation:pin .15s}
 .cin{display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid #f0f1f2;color:#9aa0a6}
 .cin input{flex:1;border:0;outline:none;font-size:16px;background:none;color:var(--tx)}
-.cin kbd,.srch kbd{font:11px Inter;background:#f3f4f5;border-radius:5px;padding:2px 6px;color:#9aa0a6}
+.cin kbd,.srch kbd{font:500 11px Inter;background:#f3f4f5;border-radius:5px;padding:2px 6px;color:#9aa0a6}
 .cres{max-height:390px;overflow:auto;padding:6px}
 .cres .lab{font-size:11.5px;font-weight:500;color:#9aa0a6;padding:10px 10px 4px}
 .cres .it{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:9px;font-size:14px;width:100%;text-align:left;color:var(--tx)}
@@ -434,7 +435,7 @@ body{background:#eceff0}
 .sh{font-size:12px;font-weight:600;color:#9aa0a6;padding:20px 0 6px}
 .srow{display:flex;align-items:center;gap:12px;padding:9px 0;border-bottom:1px solid #f3f4f5}
 .srow>div{flex:1}
-.srow b{font-weight:400;font-size:14px}
+.srow b{font-weight:500;font-size:14px}
 .srow small{display:block;font-size:12px;color:#9aa0a6;margin-top:2px}
 .sw{width:36px;height:21px;border-radius:99px;background:#d7dadd;position:relative;flex:none;transition:background .2s}
 .sw i{position:absolute;left:3px;top:3px;width:15px;height:15px;border-radius:50%;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.2);transition:transform .2s cubic-bezier(.22,.9,.3,1)}
@@ -627,7 +628,7 @@ html[data-dir=right]::view-transition-new(mbody){animation:.4s var(--ease) both 
 /* ================= v8 — chữ đậm · hình nền khung nội dung ================= */
 .nav{font-weight:600}.nav.on{font-weight:700}.nav .n{font-weight:500}
 .h1row h1{font-weight:700;letter-spacing:-.015em}
-#mainc{position:relative;overflow:hidden}
+#mainc{position:relative;overflow:hidden;overflow:clip}
 #mainc>*:not(.bgl){position:relative;z-index:1}
 .bgl{position:absolute!important;inset:0;z-index:0;background:center/cover no-repeat;pointer-events:none}
 .dk .bgl{filter:brightness(.5) saturate(.85)}
@@ -786,6 +787,10 @@ body{min-height:0}
 .frame{max-width:none;width:100vw;height:100vh;border-radius:0;box-shadow:none}
 /* (v2.4.0) điện thoại thật: bỏ viền "máy giả" của mẫu, cao đúng phần nhìn thấy (thanh địa chỉ co giãn) */
 .frame.phone{max-width:none;height:100vh;height:100dvh;border:0;border-radius:0}
+/* (v2.5.0) app máy tính: 1 vạch mảnh ngăn thanh tiêu đề (trắng) với phần app */
+.frame.mwapp{border-top:1px solid #e3e7ea}.frame.mwapp.dk{border-top-color:#2c2f33}
+/* (v2.5.0) giữ 0,25 s mới kéo: dòng được "nhấc" lên khi đủ giờ */
+.sortable-chosen{transform:scale(1.02);box-shadow:0 10px 26px rgba(15,23,42,.18)!important;transition:transform .12s,box-shadow .12s}
 .lerr{min-height:18px;font-size:12.5px;color:#d93025;text-align:center}
 .lma{text-align:center;font-size:22px;letter-spacing:.4em;font-weight:600}
 .lbk{font-size:13px;color:var(--mu);padding:6px;border-radius:8px}.lbk:hover{color:var(--ac2)}
@@ -794,7 +799,7 @@ body{min-height:0}
 @media print{.side,.ptop,.pbar,.qa,#mhead .r,.rsz,.detail{display:none!important}.frame,.app,.main{height:auto!important;overflow:visible!important}.bgl{display:none}}
 /* ================= v2.2.0 — ảnh nền cố định · tiêu đề rõ trên mọi ảnh · dàn trang theo LỚP ================= */
 /* dàn trang bám LỚP (không bám id): bóng chuyển cảnh là bản chép đã xoá id — bám id thì ô Thêm việc trong bóng rơi lên giữa */
-.mainc{display:flex;flex-direction:column;flex:1;min-height:0;position:relative;overflow:hidden}
+.mainc{display:flex;flex-direction:column;flex:1;min-height:0;position:relative;overflow:hidden;overflow:clip}   /* (v2.5.0) clip: trình duyệt KHÔNG tự cuộn khung này khi focus ô nhập (đầu trang bị cắt) */
 .mainc>*{position:relative;z-index:1}
 .mainc>.body{flex:1;min-height:0;scrollbar-gutter:stable;padding-right:30px}
 .phone .mainc>.body{padding-right:4px}
@@ -877,7 +882,7 @@ body{min-height:0}
 .pall .prop .k{width:118px;color:#3c4043;font-weight:500;gap:12px}
 .pall .prop .k svg.i{width:17px;height:17px;color:var(--ac)}
 .pall .padd{width:100%;text-align:left;font-size:13.5px;cursor:pointer;transition:background .15s}
-.pall .padd .k{color:#80868b;font-weight:400;width:auto}
+.pall .padd .k{color:#80868b;font-weight:500;width:auto}
 .pall .padd .k svg.i{color:#9aa0a6}
 .pall .padd:hover .k,.pall .padd:hover .k svg.i{color:var(--ac2)}
 .dk .pall .prop .k{color:#d5d8dc}.dk .pall .padd .k{color:#8a9096}
@@ -930,7 +935,8 @@ function dragScroll(on,fromEl){
   DS.raf=requestAnimationFrame(tick);}
 if(window.Sortable){const _mk=Sortable.create.bind(Sortable);
   Sortable.create=(el,o={})=>{const st=o.onStart,en=o.onEnd,fr=()=>document.getElementById('frame');
-    return _mk(el,Object.assign({forceFallback:true,fallbackTolerance:4,scroll:false},o,{
+    /* (v2.5.0) thầy chốt: GIỮ ~0,25 s mới kéo được (chuột lẫn cảm ứng) — bấm nhanh chỉ mở/chọn; nhích tay trước khi đủ giờ = huỷ kéo */
+    return _mk(el,Object.assign({forceFallback:true,fallbackTolerance:4,scroll:false},o,{delay:250,delayOnTouchOnly:false,touchStartThreshold:6,
       onStart(e){fr()&&fr().classList.add('dragging');DS.y=(e.originalEvent&&e.originalEvent.clientY)||0;dragScroll(true,e.from);st&&st.call(this,e);},
       onEnd(e){dragScroll(false);fr()&&fr().classList.remove('dragging');en&&en.call(this,e);}}));};}
 /* ================== biểu tượng ================== */
@@ -1036,7 +1042,8 @@ function scope(nav){
   if(nav==='all')return{title:'Tất cả',emoji:'🗂️',pred:()=>true,grp:'list'};
   if(nav==='done')return{title:'Đã hoàn thành',emoji:'✅',pred:t=>t.done,onlyDone:1,grp:'doneAt'};
   if(nav==='mylink')return{title:'myLink',mylink:1,pred:()=>false};
-  if(nav==='tap')return{title:'Tập luyện',tap:1,pred:()=>false};   /* (v2.4.0) mục Tập luyện — web/tap/tap.js */
+  if(nav==='tap')return{title:'Tập luyện',tap:1,pred:()=>false};
+  if(nav==='nhac')return{title:'myMusic',nhac:1,pred:()=>false};   /* (v2.5.0) kho nhạc riêng — web/nhac/nhac.js */   /* (v2.4.0) mục Tập luyện — web/tap/tap.js */
   if(nav.startsWith('v:')){const v=DB.views.find(x=>'v:'+x.id===nav);if(!v)return scope('all');
     return{title:v.name,saved:fltText(v.f,v.grp),savedV:v,pred:fltPred(v.f),grpBy:v.grp,defView:v.view,
       newT:Object.assign({},v.f.lists&&v.f.lists.length===1?{list:v.f.lists[0]}:{},v.f.tags?{tags:[...v.f.tags]}:{})};}
@@ -1084,14 +1091,16 @@ document.addEventListener('scroll',e=>{const el=e.target.nodeType===9?document.d
   el.classList.add('scrolling');clearTimeout(el._sc);el._sc=setTimeout(()=>el.classList.remove('scrolling'),650);},true);
 function shell(){
   applyCols();
-  frame.className='frame'+(S.dev==='phone'?' phone':'')+(isDark()?' dk':'')+'';
+  frame.className='frame'+(S.dev==='phone'?' phone':'')+(isDark()?' dk':'')+(window.mywork?' mwapp':'');
+  if(window.mywork&&window.mywork.setTheme)window.mywork.setTheme(isDark()?'dark':'light');   /* (v2.5.0) thanh tiêu đề Windows Sáng/Tối theo app */
   if(S.loggedOut){frame.innerHTML=loginHtml();return;}
   frame.innerHTML=`<div class="app${S.dev==='phone'?' phone':''}"><div class="bgl" id="bgl"></div>
     <aside class="side" id="side"><div class="navpill" id="navpill"></div><div id="sideIn"></div></aside>
     <div class="rsz" data-rsz="side" title="Kéo để đổi độ rộng · bấm đúp = mặc định"></div>
     <section class="main" id="main">
       <div class="ptop"><button data-a="drawer">${ic('menu')}</button><span style="margin-left:auto"></span><button data-a="cmdk">${ic('search')}</button></div>
-      <div id="mainc" class="mainc"><div id="mhead"></div><div id="mlHost" class="mlhost" hidden></div><div id="tapHost" class="taphost" hidden></div><div id="fbar"></div><div class="body" id="mbody"></div><div class="qa" id="qa"></div></div>
+      <div id="mainc" class="mainc"><div id="mhead"></div><div id="mlHost" class="mlhost" hidden></div><div id="tapHost" class="taphost" hidden></div><div id="nhacHost" class="nhachost" hidden></div><div id="fbar"></div><div class="body" id="mbody"></div><div class="qa" id="qa"></div></div>
+      <div class="mpbar" id="mpBar" hidden></div>
       <nav class="pbar" id="pbar"></nav>
     </section>
     <div class="scrim" id="scrim" data-a="scrim"></div>
@@ -1099,8 +1108,10 @@ function shell(){
     <aside class="detail" id="detail"></aside>
     <div class="calscrim" id="calscrim" data-a="close"></div><aside class="detail detail2" id="detail2"></aside>
     <div id="ovl"></div>
+    <div class="n-full" id="mpFull"></div>
     <div class="pop" id="pop"></div><div class="toast" id="toast"></div></div>`;
   renderAll();renderOvl();
+  if(window.NHAC)window.NHAC.nhacGanThanh($('mpBar'),$('mpFull'),{dev:S.dev});   /* (v2.5.0) thanh nhạc chạy xuyên mọi mục */
 }
 const $=id=>frame.querySelector('#'+id);
 function renderAll(){renderSide();renderMain();renderDetail();renderPbar();}
@@ -1113,7 +1124,8 @@ function renderSide(){
   $('sideIn').innerHTML=`<div class="brand"><img class="lg" src="logo.svg" alt=""> myWork
      <button class="ib" style="margin-left:auto" data-a="cmdk" title="Tìm kiếm (Ctrl K)">${ic('search','width:17px;height:17px')}</button></div>
    ${S.role==='thay'?`<button class="nav${S.nav==='mylink'?' on':''}" data-nav="mylink">${IC_ML}<span class="nl">myLink</span><span class="n">${mlToday()}</span></button>
-     <button class="nav${S.nav==='tap'?' on':''}" data-nav="tap">${IC_TAP}<span class="nl">Tập luyện</span><span class="n">${window.TAP?window.TAP.tapConLai():''}</span></button><div class="sep"></div>`:''}
+     <button class="nav${S.nav==='tap'?' on':''}" data-nav="tap">${IC_TAP}<span class="nl">Tập luyện</span><span class="n">${window.TAP?window.TAP.tapConLai():''}</span></button>
+     <button class="nav${S.nav==='nhac'?' on':''}" data-nav="nhac">${IC_NHAC}<span class="nl">myMusic</span><span class="n"></span></button><div class="sep"></div>`:''}
    ${n('myday','sun','Ngày của tôi')}${sm.important?n('important','star','Quan trọng'):''}${sm.planned?n('planned','cal','Có hạn'):''}
    ${sm.inbox?n('l:inbox','inbox','Việc',cnt(t=>t.list==='inbox')||''):''}
    <div class="sep"></div>
@@ -1205,10 +1217,12 @@ function renderMain(){
 }
 function _renderMain(){
   const sc=scope(S.nav);
-  $('qa').hidden=!!sc.mylink||!!sc.tap||S.view==='board'||S.view==='cal';$('fbar').innerHTML='';
+  $('qa').hidden=!!sc.mylink||!!sc.tap||!!sc.nhac||S.view==='board'||S.view==='cal';$('fbar').innerHTML='';
   paintBg();
-  if(sc.tap){showMyLink(false);return showTap(true);}
+  if(sc.tap){showMyLink(false);showNhac(false);return showTap(true);}
   showTap(false);
+  if(sc.nhac){showMyLink(false);return showNhac(true);}
+  showNhac(false);
   if(sc.mylink)return showMyLink(true);
   showMyLink(false);
   const tf=S.flt[S.nav],fp=fltPred(tf);
@@ -1535,7 +1549,7 @@ function defBg(nav){
     'p-la-binh','p-sua-neon','p-doi-thong-may','p-ho-suong-som','p-bien-tren-cao','p-bokeh-la','p-nui-ngan-ha','p-rua-bien','p-may-hong','p-rung-suong'];   /* (v15) xoay vòng cả ảnh mới */
   const ids=nav.startsWith('l:')?DB.lists.map(l=>'l:'+l.id):DB.views.map(v=>'v:'+v.id);const i=Math.max(0,ids.indexOf(nav));
   return nav.startsWith('v:')?['p-troi-trong','p-cat-gon','p-thong-tuyet','p-hoa-hong-nhat'][i%4]:pool[i%pool.length];}
-const curBg=()=>S.nav==='mylink'||S.nav==='tap'?'none':((S.bg||{})[S.nav]||defBg(S.nav));
+const curBg=()=>S.nav==='mylink'||S.nav==='tap'||S.nav==='nhac'?'none':((S.bg||{})[S.nav]||defBg(S.nav));
 function paintBg(){const b=BG(curBg()),m=$('mainc'),l=$('bgl');if(!m||!l)return;
   const u=b?b.url:'none';
   if(l.dataset.u&&l.dataset.u!==u&&!noMotion()){const g=l.cloneNode();g.removeAttribute('id');l.after(g);onDone(g.animate([{opacity:1},{opacity:0}],{duration:320,easing:EASE,fill:'forwards'}),320,()=>g.remove());}
@@ -1570,13 +1584,31 @@ function showMyLink(on){
 /* (v2.4.0) mục Tập luyện: module web/tap/tap.js vẽ trọn trong #tapHost (đầu trang + thẻ + thanh dưới ở điện thoại) */
 function showTap(on){
   const h=$('tapHost');if(!h)return;
-  h.hidden=!on;$('pbar').hidden=on&&S.dev==='phone';
-  if(!on){if(S.tapH){S.tapH.huy();S.tapH=null;}return;}
+  h.hidden=!on;
+  if(!on){if(S.tapH){S.tapH.huy();S.tapH=null;renderPbar();}return;}
   $('mbody').hidden=true;$('mhead').innerHTML='';
   if(!window.TAP){addEventListener('tap-ready',()=>showTap(S.nav==='tap'),{once:true});return;}
   if(S.tapH&&S.tapH.host===h)return;            /* đang vẽ trên đúng khung này ⇒ module tự vẽ lại khi dữ liệu đổi */
-  S.tapH=window.TAP.tapGan(h,{dev:S.dev});
+  S.tapH=window.TAP.tapGan(h,{dev:S.dev,nav:S.dev==='phone'?$('pbar'):null});   /* (v2.5.0) điện thoại: 4 thẻ ở thanh dưới */
 }
+/* (v2.5.0) mục myMusic: module web/nhac/nhac.js vẽ trang thư viện trong #nhacHost */
+function showNhac(on){
+  const h=$('nhacHost');if(!h)return;
+  h.hidden=!on;
+  if(!on){if(S.nhacH){S.nhacH.huy();S.nhacH=null;}return;}
+  $('mbody').hidden=true;$('mhead').innerHTML='';
+  if(!window.NHAC){addEventListener('nhac-ready',()=>showNhac(S.nav==='nhac'),{once:true});return;}
+  if(S.nhacH&&S.nhacH.host===h)return;
+  S.nhacH=window.NHAC.nhacGanTrang(h,{dev:S.dev});
+}
+/* nối myMusic với kho (sau đăng nhập) */
+function noiNhac(){
+  const go=()=>{window.NHAC.nhacNoi({ghi:window.KHO.nhac.ghi,tai:window.KHO.nhac.tai,xoa:window.KHO.nhac.xoa,toast:m=>toast(m)});
+    window.NHAC.nhacGanThanh($('mpBar'),$('mpFull'),{dev:S.dev});
+    window.KHO.nhac.nghe(dl=>window.NHAC.nhacNap(dl));};
+  if(window.NHAC)go();else addEventListener('nhac-ready',go,{once:true});
+}
+const IC_NHAC='<svg class="i" viewBox="0 0 24 24"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>';
 /* nối module Tập luyện với kho (sau đăng nhập) */
 function noiTap(){
   const go=()=>{window.TAP.tapNoi({ghiNgay:window.KHO.tap.ghiNgay,ghiHoso:window.KHO.tap.ghiHoso,ghiAnh:window.KHO.tap.ghiAnh,
@@ -1611,7 +1643,7 @@ function ckSearch(){
   if(tasks.length)R.push([q?'Việc':'Việc hôm nay',tasks.map(t=>({v:'t:'+t.id,h:`<span class="ck mini${t.done?' on':''}" style="--lc:${L(t.list).color}"></span><span class="tx${t.done?' dn':''}">${mk(t.title)}</span><span class="r">${esc(L(t.list).name)}</span>`}))]);
   const ls=DB.lists.filter(l=>hit(l.name));if(q&&ls.length)R.push(['Danh sách',ls.map(l=>({v:'n:l:'+l.id,h:`<span class="ldot" style="background:${l.color}"></span>${mk(l.name)}`}))]);
   const tp=DB.tpls.filter(x=>hit(x.name)||(q&&'mẫu'.includes(q)));if(tp.length)R.push(['Tạo việc từ mẫu',tp.map(x=>({v:'p:'+x.id,h:`${ic('note')} ${mk(x.name)}<span class="r">${x.steps.length} bước</span>`}))]);
-  const go=[['n:myday','sun','Ngày của tôi'],['n:important','star','Quan trọng'],['n:planned','cal','Có hạn'],...(S.role==='thay'?[['n:mylink','link','myLink'],['n:tap','repeat','Tập luyện']]:[]),['s:settings','sliders','Cài đặt'],['s:theme','sun','Đổi Sáng / Tối']].filter(x=>hit(x[2]));
+  const go=[['n:myday','sun','Ngày của tôi'],['n:important','star','Quan trọng'],['n:planned','cal','Có hạn'],...(S.role==='thay'?[['n:mylink','link','myLink'],['n:tap','repeat','Tập luyện'],['n:nhac','repeat','myMusic']]:[]),['s:settings','sliders','Cài đặt'],['s:theme','sun','Đổi Sáng / Tối']].filter(x=>hit(x[2]));
   if(go.length)R.push(['Đi tới',go.map(x=>({v:x[0],h:`${ic(x[1])} ${mk(x[2])}`}))]);
   $('ckRes').innerHTML=R.length?R.map(([lab,its])=>`<div class="lab">${lab}</div>`+its.map(x=>`<button class="it" data-ck2="${x.v}">${x.h}</button>`).join('')).join(''):`<div class="empty" style="padding:34px 10px">Không thấy "${esc(q)}"</div>`;
   const f=$('ckRes').querySelector('.it');if(f)f.classList.add('hi');
@@ -1695,10 +1727,11 @@ function batDau(user){
     vt('theme','',()=>{S.loggedOut=false;shell();});
     window.KHO.ml.list().then(t=>{DB.ml=t;renderSide();}).catch(()=>{});
     noiTap();
+    noiNhac();
     henLuu();
   },e=>{S.dangVao=false;S.lg={loi:'Không đọc được dữ liệu ('+(e&&e.code||e)+')'};window.KHO.thoat();shell();});
 }
-function dangXuat(){S.dangVao=false;window.KHO.luu();window.KHO.dongKho();window.KHO.ml.dong();window.KHO.tap.dong();if(window.TAP)window.TAP.tapDong();S.tapH=null;window.KHO.thoat();
+function dangXuat(){S.dangVao=false;window.KHO.luu();window.KHO.dongKho();window.KHO.ml.dong();window.KHO.tap.dong();if(window.TAP)window.TAP.tapDong();S.tapH=null;window.KHO.nhac.dong();if(window.NHAC)window.NHAC.nhacDong();S.nhacH=null;window.KHO.thoat();
   DB=khoRong();S.sel=null;S.selDay=null;S.modal=null;S.ovlKind='';S.lg=null;
   vt('theme','',()=>{S.loggedOut=true;shell();loginFocus();});}
 /* máy khác vừa sửa: vẽ lại — nhưng đang gõ dở thì đợi rời ô gõ */
@@ -2020,7 +2053,7 @@ function navTo(k,after){
   const dir=navIndex(k)>=navIndex(S.nav)?'down':'up';
   /* (v15) thầy: đang mở chi tiết mà đổi thư mục ⇒ VẪN giữ cột chi tiết (việc đang xem), tới khi bấm việc khác / ✕ / Esc.
      Chỉ đóng khi vào myLink (trang khác hẳn) hoặc ở điện thoại (chi tiết là tấm phủ). */
-  vt('nav',dir,()=>{S.nav=k;if(k==='mylink'||k==='tap'||S.dev==='phone'||(S.sel!=null&&!TK(S.sel)))S.sel=null;S.selDay=null;S.kOpen=null;S.iOpen=null;S.fOpen=false;S.drawer=false;closePop(true);
+  vt('nav',dir,()=>{S.nav=k;if(k==='mylink'||k==='tap'||k==='nhac'||S.dev==='phone'||(S.sel!=null&&!TK(S.sel)))S.sel=null;S.selDay=null;S.kOpen=null;S.iOpen=null;S.fOpen=false;S.drawer=false;closePop(true);
     renderAll();if(after)after();
     if(k==='mylink')return new Promise(r=>setTimeout(r,80));});   /* đợi myLink dựng xong mới chụp cảnh mới */
 }
@@ -2307,6 +2340,7 @@ document.addEventListener('keydown',e=>{
 const _add=addQA;addQA=function(txt){_add(txt);if(S.qaStatus){const t=DB.tasks[DB.tasks.length-1];setStatus(t,S.qaStatus);S.qaStatus=null;renderMain();}};
 
 function renderPbar(){
+  if(S.nav==='tap'&&S.tapH&&S.dev==='phone'&&S.tapH.vePnav)return S.tapH.vePnav();   /* (v2.5.0) ở Tập luyện: thanh dưới = 4 thẻ tập */
   $('pbar').innerHTML=`<button class="${S.nav==='myday'?'on':''}" data-nav="myday">${ic('sun')}Hôm nay</button>
    <button class="${S.nav==='important'?'on':''}" data-nav="important">${ic('star')}Quan trọng</button>
    <button class="fab" data-a="fab">${ic('plus')}</button>
@@ -2346,6 +2380,12 @@ window.dispatchEvent(new Event('ml-ready'));
 import { tapNoi, tapNap, tapGan, tapConLai, tapDong } from './tap/tap.js';
 window.TAP = { tapNoi, tapNap, tapGan, tapConLai, tapDong };
 window.dispatchEvent(new Event('tap-ready'));
+</script>
+<script type="module">
+/* (v2.5.0) myMusic */
+import { nhacNoi, nhacNap, nhacGanThanh, nhacGanTrang, nhacDong } from './nhac/nhac.js';
+window.NHAC = { nhacNoi, nhacNap, nhacGanThanh, nhacGanTrang, nhacDong };
+window.dispatchEvent(new Event('nhac-ready'));
 </script>
 </body>
 </html>

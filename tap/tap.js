@@ -12,6 +12,7 @@
    NHẬT KÝ 1 NGÀY: { sang:0|1, b:{ <mã bài>: [[kg, lần, xong], …] }, calo, buoc, can, vb, cg(1–5), gc }
    ============================================================ */
 import { LIB as LIB0, SESS as SESS0, BYDOW as BY0 } from './giao-an.js';
+import { chayHinh } from './hinh.js';
 
 /* ───────── ngày tháng ───────── */
 const pad = (n) => String(n).padStart(2, '0');
@@ -97,6 +98,27 @@ function soMoi(day, it, i, k) {
   if (k === 0) { const sg = suggest(it, day), lk = lastOf(id, day); return sg && sg.kg != null ? sg.kg : lk ? +lk.a[0][0] || 0 : 0; }
   return lb.loai === 'tick' ? 1 : lb.loai === 'giay' ? lowRep(it[2]) : topRep(it[2]) || 0;
 }
+/* (v2.5.0) Ô SỐ TỰ HIỂU (thầy chốt mẫu v5): gõ không cần dấu phẩy — 634 ⇒ 63,4 kg · 905 ⇒ 90,5 cm · 1m58 / 1,58 ⇒ 158 cm.
+   Ngoài khoảng hợp lý ⇒ báo sai; lệch xa lần trước ⇒ HỎI LẠI (Đúng / Sửa), không tự lưu. */
+const LUAT_SO = {
+  can: { dv: 'kg', min: 30, max: 200, lech: 5 },
+  vb: { dv: 'cm', min: 50, max: 160, lech: 6 },
+  cao: { dv: 'cm', min: 120, max: 220, lech: 4 },
+};
+function hieuSo(raw, k, truoc) {
+  const L = LUAT_SO[k]; let s = String(raw).trim().toLowerCase().replace(/\s+/g, '').replace(/(kg|cm)$/, '');
+  if (k === 'cao') { const m = s.match(/^(\d)m(\d{1,2})$/); if (m) s = m[1] + '.' + m[2].padEnd(2, '0'); }
+  s = s.replace(',', '.'); if (!/^\d+(\.\d+)?$/.test(s)) return { loi: 'Chỉ gõ số' };
+  let v = +s;
+  if (k === 'cao' && v > 0 && v < 3) v = Math.round(v * 100);          /* 1.58 m ⇒ 158 cm */
+  if (!s.includes('.')) while (v > L.max && v >= 10) v /= 10;          /* 634 ⇒ 63,4 */
+  v = Math.round(v * 10) / 10;
+  if (v < L.min || v > L.max) return { loi: `${vn(v)} ${L.dv} không hợp lý — gõ lại` };
+  if (truoc != null && Math.abs(v - truoc) > L.lech) return { v, hoi: `${vn(v)} ${L.dv}? Lần trước ${vn(truoc)} ${L.dv}` };
+  return { v };
+}
+/* số đo gần nhất TRƯỚC ngày đang xem (để so lệch) */
+function soTruoc(f, day) { for (let d = add(day, -1); d >= add(START(), -60); d = add(d, -1)) { const v = LOG[d] && +LOG[d][f]; if (v > 0) return v; } return null; }
 /* ghi 1 ngày: gộp 0,6 s rồi gửi đúng trường của ngày đó */
 function luuNgay(day) {
   clearTimeout(CHO.get(day));
@@ -132,7 +154,7 @@ export function tapDong() { Object.keys(LOG).forEach((k) => delete LOG[k]); CHO.
 const TABS = [['hom', 'Hôm nay', 'dumb'], ['tuan', 'Tuần', 'cal'], ['so', 'Số liệu', 'chart'], ['hs', 'Hồ sơ', 'user']];
 const nho = (() => { try { return JSON.parse(localStorage.getItem('mywork.tap') || '{}'); } catch (e) { return {}; } })();
 const ghiNho = () => { try { localStorage.setItem('mywork.tap', JSON.stringify(nho)); } catch (e) {} };
-const S = { tab: 'hom', day: null, open: {}, wake: !!nho.wake, goc: false, big: null };
+const S = { tab: 'hom', day: null, open: {}, how: {}, wake: !!nho.wake, big: null, hoi: {} };
 
 export function tapGan(host, opt) {
   if (H) H.huy();
@@ -140,6 +162,11 @@ export function tapGan(host, opt) {
   host.innerHTML = `<div class="tp${phone ? ' phone' : ''}"><div class="t-head" id="tH"></div><div class="t-body" id="tB"></div>
     <nav class="t-pnav" id="tN"></nav><div class="t-rest" id="tR"></div><div class="t-tipb" id="tT"></div><input type="file" accept="image/*" id="tF" hidden></div>`;
   const root = host.firstElementChild, $ = (id) => root.querySelector('#' + id);
+  /* (v2.5.0) điện thoại: 4 thẻ vẽ vào THANH DƯỚI của app (opt.nav = #pbar) ⇒ thanh nhạc myMusic nằm ngay trên nó */
+  const NAV = (opt && opt.nav) || null;
+  if (NAV) root.classList.add('ngoainav');
+  const onNav = (e) => { const tb = e.target.closest('[data-tab]'); if (!tb || S.tab === tb.dataset.tab) return; e.stopPropagation(); S.tab = tb.dataset.tab; S.big = null; ve(true); };
+  if (NAV) NAV.addEventListener('click', onNav);
   if (!S.day) S.day = today();
   const CH = {};
   let wl = null, R = { end: 0, total: 0, iv: 0 };
@@ -162,7 +189,11 @@ export function tapGan(host, opt) {
       <div class="t-tabs" id="tTabs"${S.tab === 'hom' ? '' : ' style="margin-left:auto"'}><i class="t-pill" id="tPill"></i>${TABS.map(([k, l]) => `<button data-tab="${k}" class="${S.tab === k ? 'on' : ''}">${l}</button>`).join('')}</div></div>
       ${sub || (S.tab === 'hom' && S.day !== t) ? `<div class="t-sub">${sub}${S.tab === 'hom' && S.day !== t ? `<button data-a="homnay">Về hôm nay</button>` : ''}</div>` : ''}`;
     requestAnimationFrame(pill);
-    $('tN').innerHTML = TABS.map(([k, l, i]) => `<button data-tab="${k}" class="${S.tab === k ? 'on' : ''}">${ic(i)}${l}</button>`).join('');
+    vePnav();
+  }
+  function vePnav() {
+    const el = NAV || $('tN'); if (!el) return;
+    el.innerHTML = TABS.map(([k, l, i]) => `<button data-tab="${k}" class="${S.tab === k ? 'on' : ''}">${ic(i)}${l}</button>`).join('');
   }
   function pill() { const b = $('tTabs') && $('tTabs').querySelector('button.on'), p = $('tPill'); if (!b || !p) return; p.style.width = b.offsetWidth + 'px'; p.style.transform = `translateX(${b.offsetLeft}px)`; }
   function body(anim) {
@@ -194,7 +225,7 @@ export function tapGan(host, opt) {
     h += `<div class="t-grp">${sessKey(day) === 'NN' ? 'Tối' : 'Chiều'}</div>${s.items.map((it) => exRow(it, day)).join('')}`;
     const isMon = pd(day).getDay() === 1, canDay = [1, 3, 5].includes(pd(day).getDay());
     const mrow = (f, icn, lab, unit, mode, due) => `<label class="t-mrow"><span class="t-mi">${ic(icn)}</span><span class="t-ml">${lab}${due ? '<i class="t-due" title="Hôm nay nên đo"></i>' : ''}</span>
-      <input class="t-num" data-f="${f}" inputmode="${mode}" value="${L[f] != null && L[f] !== '' ? vn(L[f]) : ''}" placeholder="—"><span class="t-mu">${unit}</span></label>`;
+      <input class="t-num" data-f="${f}" inputmode="${mode}" value="${L[f] != null && L[f] !== '' ? vn(L[f]) : ''}" placeholder="—"><span class="t-mu">${unit}</span></label>${hoiHtml(f)}`;
     h += `<div class="t-card t-ms"><h3>Chỉ số</h3><div class="t-mgrid">
        ${mrow('calo', 'fire', 'Calo tập', 'kcal', 'numeric')}
        ${mrow('buoc', 'walk', 'Số bước', 'bước', 'numeric')}
@@ -204,7 +235,18 @@ export function tapGan(host, opt) {
         <div class="t-feel">${['😫', '😕', '🙂', '😄', '💪'].map((e, i) => `<button data-cg="${i + 1}" class="${L.cg === i + 1 ? 'on' : ''}" title="${['Kiệt sức', 'Mệt', 'Ổn', 'Khoẻ', 'Rất khoẻ'][i]}">${e}</button>`).join('')}</div></div>
        <label class="t-mrow"><span class="t-mi">${ic('note')}</span><input class="t-note" data-f="gc" value="${esc(L.gc || '')}" placeholder="Ghi chú"></label>
       </div></div>`;
+    /* (v2.5.0) ảnh của RIÊNG ngày này — bấm ＋ trên iPhone: iOS hiện Chụp ảnh / Thư viện / Tệp */
+    const anhNgay = ((DL && DL.anh) || []).filter((a) => a.ngay === day);
+    h += `<div class="t-card"><h3>Ảnh <span class="t-s">${WD[pd(day).getDay()]} · ${dm(day)}</span></h3><div class="t-ph">
+       ${anhNgay.map((a) => `<div><img src="${esc(a.url)}" data-big="${esc(a.id)}" alt="" loading="lazy"></div>`).join('')}
+       ${khoa(day) ? '' : `<button class="add${S.dangTai ? ' busy' : ''}" data-a="anh">${ic(S.dangTai ? 'cam' : 'plus')}${S.dangTai ? 'Đang gửi…' : 'Thêm'}</button>`}</div></div>
+      ${S.big ? bigHtml() : ''}`;
     return h;
+  }
+  /* hộp hỏi lại dưới ô số (lệch xa lần trước / số sai) */
+  function hoiHtml(f) {
+    const q = S.hoi && S.hoi[f]; if (!q) return '';
+    return `<div class="t-hoi">${q.loi ? `<span>${esc(q.loi)}</span>` : `<span><b>${esc(q.hoi)}</b></span><button class="ok" data-hoiok="${f}">Đúng</button><button data-hoisua="${f}">Sửa</button>`}</div>`;
   }
   function sangRow(day) {
     const on = !!lg(day).sang;
@@ -235,7 +277,8 @@ export function tapGan(host, opt) {
       <div class="t-exb"><div><div class="t-exin">
        ${sg || lastTxt ? `<div class="t-hint">${sg ? `<span class="t-sug${sg.up ? ' up' : ''}">${sg.up ? ic('up', 'width:13px;height:13px') : ''}<span>${sg.txt}</span></span>` : ''}${lastTxt ? `<span class="t-last" title="Lần trước">${lastTxt}</span>` : ''}</div>` : ''}
        ${sets}
-       <details class="t-how"><summary>${ic('book', 'width:14px;height:14px')} Cách tập</summary>
+       <details class="t-how" data-how="${day + id}"${S.how[day + id] ? ' open' : ''}><summary>${ic('book', 'width:14px;height:14px')} Cách tập</summary>
+        <div class="t-fig" data-fig="${id}"></div>
         <ol>${(lb.cach || []).map((x) => `<li>${esc(x)}</li>`).join('')}</ol>
         ${lb.de ? `<div style="margin-top:6px"><b>Bản dễ:</b> ${esc(lb.de)}</div>` : ''}
         ${lb.loi && lb.loi.length ? `<div class="t-bad"><b>Lỗi hay gặp:</b> ${esc(lb.loi.join(' '))}</div>` : ''}</details>
@@ -389,7 +432,7 @@ export function tapGan(host, opt) {
     const anh = ((DL && DL.anh) || []).slice().sort((a, b) => b.ngay.localeCompare(a.ngay));
     return `<div class="t-pf">
      <div class="t-card"><h3>Thông tin</h3><div class="t-kv">
-       <span>Chiều cao</span><b>${HSo.cao} cm</b><span>Bắt đầu</span><b>${dm(START())}</b>
+       <span>Chiều cao</span><b class="t-kvin"><input class="t-num" data-hs="cao" inputmode="decimal" value="${HSo.cao ? vn(HSo.cao) : ''}" placeholder="—"> cm</b>${hoiHtml('cao')}<span>Bắt đầu</span><b>${dm(START())}</b>
        <span>Lúc đầu</span><b>${D.can != null ? vn(D.can) + ' kg' : '—'} · ${D.vb != null ? vn(D.vb) + ' cm' : '—'}</b>
        <span>Hiện tại</span><b>${cur != null ? vn(cur, 1) + ' kg' : '—'} · ${vbc != null ? vn(vbc) + ' cm' : '—'}</b>
        <span>Ngủ</span><b>${esc(HSo.ngu || '')}</b><span>Ăn</span><b>${esc(HSo.an || '')}</b></div></div>
@@ -407,10 +450,9 @@ export function tapGan(host, opt) {
       }).join('')}</div></div>
      <div class="t-card"><h3>Số đo</h3>${meas.length ? `<table class="t-tbl"><thead><tr><th>Ngày</th><th>kg</th><th>cm</th></tr></thead><tbody>
       ${meas.map((d) => `<tr><td>${WD[pd(d).getDay()]} ${dm(d)}</td><td>${+LOG[d].can > 0 ? vn(LOG[d].can) : '—'}</td><td>${+LOG[d].vb > 0 ? vn(LOG[d].vb) : '—'}</td></tr>`).join('')}</tbody></table>` : '<div class="t-empty">Chưa có số</div>'}</div>
-     <div class="t-card"><h3>Ảnh <span class="t-s">2 tuần/lần</span></h3>
-      <div class="t-ph">${anh.map((a) => `<div><img src="${esc(a.url)}" data-big="${esc(a.id)}" alt="" loading="lazy"><span class="cap">${dm(a.ngay)} · ${GOC[a.goc] || ''}</span></div>`).join('')}
-       <button class="add${S.dangTai ? ' busy' : ''}" data-a="anh">${ic(S.dangTai ? 'cam' : 'plus')}${S.dangTai ? 'Đang gửi…' : dm(today())}</button></div>
-      ${S.goc ? `<div class="t-goc">${Object.entries(GOC).map(([k, l]) => `<button data-goc="${k}">${l}</button>`).join('')}</div>` : ''}</div>
+     <div class="t-card"><h3>Ảnh <span class="t-s">mọi ngày</span></h3>
+      <div class="t-ph">${anh.map((a) => `<div><img src="${esc(a.url)}" data-big="${esc(a.id)}" alt="" loading="lazy"><span class="cap">${dm(a.ngay)}${GOC[a.goc] ? ' · ' + GOC[a.goc] : ''}</span></div>`).join('')}
+       <button class="add${S.dangTai ? ' busy' : ''}" data-a="anh" data-ngay="${today()}">${ic(S.dangTai ? 'cam' : 'plus')}${S.dangTai ? 'Đang gửi…' : dm(today())}</button></div></div>
     </div>
     <div class="t-card t-plan"><h3>${esc(gaOf(today()).ten)} <span class="t-s">từ ${dm(gaOf(today()).tu)}</span></h3>
      ${['TA', 'DA', 'CD', 'TB', 'DB', 'TT', 'NN'].map((k, i) => { const g = gaOf(today()), s = g.SESS[k]; if (!s) return ''; return `<details><summary><b>${['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'][i]}</b>${esc(s.ten)}<span>${s.items.length} bài · ${s.phut}'</span></summary>
@@ -431,17 +473,18 @@ export function tapGan(host, opt) {
     for (const q of [0.82, 0.7, 0.55]) { const b = await new Promise((r) => cv.toBlob(r, 'image/jpeg', q)); if (b && b.size < 1.4 * 1024 * 1024) return b; }
     throw new Error('anh-qua-lon');
   }
-  async function guiAnh(file, goc) {
+  /* (v2.5.0) ảnh gắn với NGÀY (ngày đang xem ở Hôm nay / hôm nay ở Hồ sơ); không còn chọn góc */
+  async function guiAnh(file, ngay) {
     S.dangTai = true; body();
     try {
-      const blob = await nenAnh(file), t = today(), id = t + '_' + goc + '_' + Date.now().toString(36);
+      const blob = await nenAnh(file), id = ngay + '_' + Date.now().toString(36);
       const r = await API.taiAnh(blob, id + '.jpg');
-      const ds = ((DL && DL.anh) || []).concat([{ id, ngay: t, goc, p: r.p, url: r.url }]);
+      const ds = ((DL && DL.anh) || []).concat([{ id, ngay, p: r.p, url: r.url }]);
       if (DL) DL.anh = ds;
       await API.ghiAnh(ds);
       API.toast('Đã lưu ảnh');
     } catch (e) { console.error('[tap] ảnh', e); API.toast('Chưa gửi được ảnh — thử lại'); }
-    S.dangTai = false; if (S.tab === 'hs') body();
+    S.dangTai = false; body();
   }
 
   /* ── hẹn giờ nghỉ ── */
@@ -478,8 +521,10 @@ export function tapGan(host, opt) {
     const dy = T.closest('[data-day]'); if (dy) { S.day = dy.dataset.day; ve(); return; }
     const gd = T.closest('[data-goday]'); if (gd) { S.day = gd.dataset.goday; S.tab = 'hom'; ve(true); return; }
     /* ảnh */
-    if (T.closest('[data-a="anh"]')) { S.goc = !S.goc; body(); return; }
-    const gc = T.closest('[data-goc]'); if (gc) { S.gocChon = gc.dataset.goc; S.goc = false; body(); $('tF').value = ''; $('tF').click(); return; }
+    const ah = T.closest('[data-a="anh"]'); if (ah) { if (S.dangTai) return; S.anhNgay = ah.dataset.ngay || S.day; $('tF').value = ''; $('tF').click(); return; }
+    /* hỏi lại ô số: Đúng = lưu số đã hỏi · Sửa = xoá ô, gõ lại */
+    const hk = T.closest('[data-hoiok]'); if (hk) { const f = hk.dataset.hoiok, q = S.hoi[f]; delete S.hoi[f]; luuSo(f, q.v); return; }
+    const hs = T.closest('[data-hoisua]'); if (hs) { const f = hs.dataset.hoisua; delete S.hoi[f]; body(); const o = root.querySelector(f === 'cao' ? '[data-hs="cao"]' : `[data-f="${f}"]`); if (o) { o.value = ''; o.focus(); } return; }
     const bg = T.closest('[data-big]'); if (bg) { S.big = bg.dataset.big; S.xoaHoi = false; body(); return; }
     if (T.closest('[data-a="bigdel"]')) {
       e.stopPropagation(); const a = (DL.anh || []).find((x) => x.id === S.big); if (!a) return;
@@ -541,14 +586,40 @@ export function tapGan(host, opt) {
   }
   function onChange(e) {
     const t = e.target;
-    if (t === $('tF')) { const f = t.files && t.files[0]; if (f) guiAnh(f, S.gocChon || 'truoc'); return; }
+    if (t === $('tF')) { const f = t.files && t.files[0]; if (f) guiAnh(f, S.anhNgay || S.day); return; }
+    /* chiều cao (Hồ sơ) */
+    if (t.dataset.hs === 'cao') {
+      const v0 = t.value.trim(); if (!v0) { body(); return; }
+      const r = hieuSo(v0, 'cao', HS().cao); S.hoi = S.hoi || {};
+      if (r.loi || r.hoi) S.hoi.cao = r; else { delete S.hoi.cao; luuSo('cao', r.v); return; }
+      body(); return;
+    }
     if (khoa(S.day)) { body(); return; }
     const L = lg(S.day), num = (s) => { const v = String(s).replace(',', '.').trim(); return v === '' || isNaN(+v) ? null : +v; };
     if (t.dataset.in) { const [id, i, k] = t.dataset.in.split('|'), a = L.b[id] || (L.b[id] = []); while (a.length <= +i) a.push([]); a[+i][+k] = num(t.value); doi(); body(); return; }
+    if (t.dataset.f === 'can' || t.dataset.f === 'vb') {          /* cân · vòng bụng: tự hiểu + hỏi lại khi lệch */
+      const f = t.dataset.f, v0 = t.value.trim(); S.hoi = S.hoi || {};
+      if (!v0) { delete S.hoi[f]; delete L[f]; doi(); body(); return; }
+      const r = hieuSo(v0, f, soTruoc(f, S.day));
+      if (r.loi || r.hoi) { S.hoi[f] = r; body(); return; }
+      delete S.hoi[f]; luuSo(f, r.v); return;
+    }
     if (t.dataset.f) { const v = t.dataset.f === 'gc' ? t.value.trim() : num(t.value); if (v == null || v === '') delete L[t.dataset.f]; else L[t.dataset.f] = v; doi(); if (t.dataset.f !== 'gc') body(); }
   }
-  function onInput(e) { const t = e.target; if (t.classList.contains('t-num')) t.value = t.value.replace(/[^0-9.,]/g, ''); }
+  /* lưu số đã hiểu: cân/vòng bụng vào nhật ký ngày · chiều cao vào hồ sơ */
+  function luuSo(f, v) {
+    if (f === 'cao') {
+      const hs = Object.assign({}, HS(), { cao: v }); if (DL) DL.hoso = hs;
+      API.ghiHoso({ hoso: hs }).then(() => API.toast(`Chiều cao ${vn(v)} cm`), () => API.toast('Chưa lưu được — thử lại'));
+      body(); return;
+    }
+    lg(S.day)[f] = v; doi(); body();
+  }
+  function onInput(e) { const t = e.target; if (t.classList.contains('t-num')) t.value = t.value.replace(t.dataset.hs === 'cao' ? /[^0-9.,mM]/g : /[^0-9.,]/g, ''); }
   root.addEventListener('click', onClick); root.addEventListener('keydown', onKey); root.addEventListener('change', onChange); root.addEventListener('input', onInput);
+  /* (v2.5.0) nhớ mục "Cách tập" đang mở (khung vẽ lại không đóng mất) + hình động chỉ chạy ở mục đang mở */
+  root.addEventListener('toggle', (e) => { const d = e.target; if (d.dataset && d.dataset.how) S.how[d.dataset.how] = d.open; }, true);
+  const dungHinh = chayHinh(root);
   const onRs = () => pill(); addEventListener('resize', onRs);
 
   ve();
@@ -556,7 +627,8 @@ export function tapGan(host, opt) {
     host,
     /* kho vừa đổi (máy khác / tiếng vọng): đang gõ dở thì đợi rời ô */
     veTuXa() { const f = document.activeElement; if (f && root.contains(f) && f.matches('input')) { f.addEventListener('blur', () => setTimeout(() => H && H.host === host && ve(), 0), { once: true }); return; } ve(); },
-    huy() { stopRest(); wake(false); document.removeEventListener('visibilitychange', onVis); removeEventListener('resize', onRs); if (H && H.host === host) H = null; },
+    vePnav,
+    huy() { stopRest(); wake(false); dungHinh(); if (NAV) NAV.removeEventListener('click', onNav); document.removeEventListener('visibilitychange', onVis); removeEventListener('resize', onRs); if (H && H.host === host) H = null; },
   };
   return H;
 }

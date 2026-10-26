@@ -316,5 +316,39 @@ const tap = {
   dong() { if (tapHuy) { tapHuy(); tapHuy = null; } tapCb = null; tapDL = tapRong(); },
 };
 
-window.KHO = { dangNhap, chuLoi, thoat, thuToken, phienCu, moKho, luu, dongKho, ml, tap, auth, canon, mlDoc: ML_DOC };
+// ───────── (v2.5.0) myMUSIC: mwUsers/{uid}/nhac/ds — `bai` · `ds` (chuỗi JSON: danh sách bài · danh sách phát);
+//   tệp nhạc ở Storage mwUsers/{uid}/nhac/<id>.<đuôi> (luật: chủ + claim thay, audio/*, < 25 MB) ─────────
+let nhacHuy = null;
+const nhacRef = () => doc(db, 'mwUsers', UID, 'nhac', 'ds');
+const nhac = {
+  nghe(cb) {
+    if (nhacHuy) nhacHuy();
+    nhacHuy = onSnapshot(nhacRef(), (s) => { const d = s.exists() ? s.data() : {}; cb({ san: true, bai: giai(d.bai, []), ds: giai(d.ds, []) }); }, (e) => console.warn('[nhac] nghe lỗi', e));
+  },
+  ghi: (phan) => { const du = {}; if (phan.bai !== undefined) du.bai = JSON.stringify(phan.bai); if (phan.ds !== undefined) du.ds = JSON.stringify(phan.ds); return setDoc(nhacRef(), du, { merge: true }); },
+  // gửi tệp bằng XHR để có % tiến độ (fetch không báo tiến độ tải lên)
+  tai(file, tep, kieu, tien) {
+    return new Promise((ok, loi) => {
+      const p = `mwUsers/${UID}/nhac/${tep}`;
+      auth.currentUser.getIdToken().then((tk) => {
+        const x = new XMLHttpRequest();
+        x.open('POST', `https://firebasestorage.googleapis.com/v0/b/${TAP_BUCKET}/o?uploadType=media&name=${encodeURIComponent(p)}`);
+        x.setRequestHeader('Authorization', 'Firebase ' + tk);
+        x.setRequestHeader('Content-Type', kieu);
+        x.upload.onprogress = (e) => { if (tien && e.lengthComputable) tien(e.loaded / e.total); };
+        x.onload = () => {
+          if (x.status < 200 || x.status >= 300) return loi(new Error('tai-nhac-' + x.status));
+          let j = {}; try { j = JSON.parse(x.responseText); } catch (e) {}
+          ok({ p, url: tapOng(p) + '?alt=media&token=' + String(j.downloadTokens || '').split(',')[0] });
+        };
+        x.onerror = () => loi(new Error('mang'));
+        x.send(file);
+      }, loi);
+    });
+  },
+  async xoa(p) { const tk = await auth.currentUser.getIdToken(); await fetch(tapOng(p), { method: 'DELETE', headers: { Authorization: 'Firebase ' + tk } }); },
+  dong() { if (nhacHuy) { nhacHuy(); nhacHuy = null; } },
+};
+
+window.KHO = { dangNhap, chuLoi, thoat, thuToken, phienCu, moKho, luu, dongKho, ml, tap, nhac, auth, canon, mlDoc: ML_DOC };
 window.dispatchEvent(new Event('kho-san'));

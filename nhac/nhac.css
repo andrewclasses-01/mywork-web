@@ -1,0 +1,106 @@
+/* web/nhac/nhac.css — myMusic (myWork v2.5.0). Lớp n-… (không đụng CSS cũ). Màu dùng biến app (--ac --tx --mu --li …). */
+.nhachost{flex:1;min-height:0;display:flex;flex-direction:column}
+.nhachost[hidden]{display:none}
+.nmus{flex:1;min-height:0;display:flex;flex-direction:column;font-family:Inter,'Segoe UI',sans-serif;position:relative;--n-bg:#fff;--n-soft:#f4f6f6}
+.nmus svg.i,.n-mp svg.i,.n-full svg.i{width:18px;height:18px;flex:none;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.nmus button,.n-mp button,.n-full button{font:inherit;cursor:pointer;border:0;background:none;color:inherit}
+.nmus.keo{outline:3px dashed var(--ac);outline-offset:-8px}
+.n-top{display:flex;align-items:center;gap:10px;padding:22px 30px 6px}
+.n-top h1{font-size:26px;font-weight:800;letter-spacing:-.01em}
+.n-top .n-btn{margin-left:auto}
+.n-body{flex:1;min-height:0;overflow:auto;padding:6px 30px 30px;position:relative}
+.n-btn{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:10px;font-size:13px;font-weight:700;background:var(--ac)!important;color:#fff!important}
+.n-btn.gh{background:var(--n-soft)!important;color:var(--tx)!important}
+.n-btn svg.i{width:15px;height:15px}
+.n-ib{width:34px;height:34px;border-radius:9px;display:grid;place-items:center;color:var(--mu)}
+.n-ib:hover{background:var(--n-soft)}
+.n-ib.tim{color:#e11d48}.n-ib.tim svg{fill:#e11d48}
+.n-chips{display:flex;gap:6px;flex-wrap:wrap;margin:4px 0 14px}
+.n-chip{display:inline-flex;align-items:center;gap:6px;padding:7px 12px;border-radius:99px;background:var(--n-soft);font-size:13px;font-weight:600;color:var(--tx)}
+.n-chip.on{background:var(--acl);color:var(--ac2);box-shadow:inset 0 0 0 1.5px var(--acm)}
+.n-chip i{width:10px;height:10px;border-radius:3px}
+.n-chip.add{color:var(--ac)}.n-chip.add svg.i{width:14px;height:14px}
+.n-in{padding:7px 12px;border-radius:99px;border:1.5px solid var(--ac);font-size:13px;font-weight:600;outline:none;width:170px;background:var(--n-bg)}
+.n-hd{display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap}
+.n-hd>div{flex:1;min-width:140px}
+.n-hd h2{font-size:19px;font-weight:800}
+.n-sub{font-size:12.5px;color:var(--mu);font-weight:600;margin-top:2px}
+.n-list{display:flex;flex-direction:column}
+.n-row{display:flex;align-items:center;gap:10px;padding:8px 6px;border-radius:10px;cursor:pointer;border-bottom:1px solid var(--li)}
+.n-row:hover{background:var(--n-soft)}
+.n-row.on{background:var(--acl)}
+.n-row.on .n-rt b{color:var(--ac2)}
+.n-no{width:26px;text-align:center;font-size:12.5px;color:var(--mu);font-weight:600;display:grid;place-items:center;color:var(--mu)}
+.n-row.on .n-no{color:var(--ac)}
+.n-rt{flex:1;min-width:0}
+.n-rt b{display:block;font-size:14.5px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.n-rt span{font-size:12.5px;color:var(--mu);font-weight:600}
+.n-row em{font-style:normal;font-size:12.5px;color:var(--mu);font-weight:600;font-variant-numeric:tabular-nums}
+.n-empty{padding:40px 10px;text-align:center;color:var(--mu);font-size:13.5px;font-weight:600}
+.n-tai{display:flex;flex-direction:column;gap:6px;margin-bottom:12px}
+.n-ti{position:relative;display:flex;justify-content:space-between;gap:10px;padding:8px 12px;border-radius:10px;background:var(--n-soft);font-size:13px;font-weight:600;overflow:hidden}
+.n-ti span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;position:relative}
+.n-ti em{font-style:normal;color:var(--ac2);position:relative}
+.n-ti i{position:absolute;left:0;top:0;bottom:0;background:var(--acl);transition:width .2s}
+.n-ti.loi em{color:#dc2626}
+.n-pop{position:absolute;right:30px;z-index:20;min-width:220px;max-width:280px;background:var(--n-bg);border:1px solid var(--li);border-radius:12px;box-shadow:0 14px 34px rgba(15,23,42,.18);padding:6px;display:flex;flex-direction:column}
+.n-pop .n-pt{font-size:12px;color:var(--mu);font-weight:700;padding:6px 10px 4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.n-pop button{text-align:left;padding:9px 10px;border-radius:8px;font-size:13.5px;font-weight:600}
+.n-pop button:hover{background:var(--n-soft)}
+.n-pop button.red{color:#dc2626}
+.n-pop .n-pn{font-size:12.5px;color:var(--mu);padding:6px 10px;font-weight:600}
+/* thanh nhạc mini (trong .main, trên thanh dưới) */
+.mpbar{flex:none}
+.mpbar[hidden]{display:none}
+.n-mp{margin:6px 14px 10px;border-radius:16px;background:#0f2f2b;color:#fff;display:flex;align-items:center;gap:10px;padding:8px 10px 10px;position:relative;overflow:hidden;cursor:pointer}
+.n-art{width:40px;height:40px;border-radius:10px;flex:none;display:grid;place-items:center}
+.n-art svg.i{width:20px;height:20px;color:#fff}
+.n-tt{flex:1;min-width:0}
+.n-tt b{display:block;font-size:13.5px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.n-tt span{font-size:12px;color:#9cc9c1;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block}
+.n-mp button{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;color:#fff;flex:none}
+.n-mp button.pl{background:#14a08e}
+.n-mp button svg.i{width:20px;height:20px}
+.n-pg{position:absolute;left:0;bottom:0;height:3px;background:#5eead4;transition:width .25s linear}
+/* trình phát lớn */
+.n-full{position:absolute;inset:0;z-index:60;background:linear-gradient(180deg,#0f3b35,#0a201d);color:#fff;display:flex;flex-direction:column;align-items:stretch;
+  transform:translateY(100%);visibility:hidden;transition:transform .3s cubic-bezier(.22,.9,.3,1),visibility 0s .3s}
+.n-full.on{transform:none;visibility:visible;transition:transform .3s cubic-bezier(.22,.9,.3,1)}
+.n-fhead{display:flex;align-items:center;gap:10px;padding:14px 16px 6px;color:#9cc9c1;font-size:13px;font-weight:700}
+.phone .n-fhead{padding-top:48px}
+.n-fhead button{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;color:#fff;background:#ffffff14}
+.n-fhead svg.i{width:22px;height:22px}
+.n-cov{width:min(240px,56vw);aspect-ratio:1;border-radius:26px;margin:8px auto 0;display:grid;place-items:center;box-shadow:0 20px 40px rgba(0,0,0,.35)}
+.n-cov svg.i{width:84px;height:84px;color:#fff}
+.n-full h3{font-size:20px;font-weight:800;text-align:center;margin:20px 20px 0}
+.n-ca{text-align:center;color:#9cc9c1;font-weight:600;font-size:14px;margin-top:4px}
+.n-sl{-webkit-appearance:none;appearance:none;width:calc(100% - 56px);max-width:560px;margin:18px auto 4px;height:6px;border-radius:99px;outline:none;cursor:pointer;
+  background:linear-gradient(90deg,#5eead4 var(--x,0%),#ffffff2a var(--x,0%))}
+.n-sl::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:#fff;border:0}
+.n-tm{display:flex;justify-content:space-between;width:calc(100% - 56px);max-width:560px;margin:0 auto;font-size:12px;color:#9cc9c1;font-weight:600;font-variant-numeric:tabular-nums}
+.n-ctl{display:flex;justify-content:center;align-items:center;gap:22px;margin:12px 0 6px}
+.n-ctl button{color:#fff;display:grid;place-items:center;position:relative}
+.n-ctl svg.i{width:26px;height:26px}
+.n-ctl .pl{width:66px;height:66px;border-radius:50%;background:#14a08e}
+.n-ctl .pl svg.i{width:30px;height:30px}
+.n-ctl .sm{color:#9cc9c1}.n-ctl .sm.on{color:#5eead4}
+.n-ctl .one{position:absolute;right:-6px;top:-4px;font-style:normal;font-size:10px;font-weight:800}
+.n-vol{display:flex;align-items:center;gap:10px;justify-content:center;color:#9cc9c1}
+.n-vl{width:180px;accent-color:#5eead4}
+.n-ql{flex:1;min-height:0;overflow:auto;margin:10px 14px 16px;background:#ffffff10;border-radius:16px;padding:6px;width:calc(100% - 28px);max-width:640px;align-self:center}
+.n-ql h4{font-size:12.5px;font-weight:700;color:#9cc9c1;padding:8px 10px 4px}
+.n-q{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:10px;font-size:13.5px;font-weight:600;cursor:pointer}
+.n-q:hover{background:#ffffff0c}
+.n-q.on{background:#ffffff18;color:#5eead4}
+.n-q>div{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.n-sa{width:34px;height:34px;border-radius:8px;flex:none}
+.n-q small{display:block;font-size:11.5px;color:#9cc9c1;font-weight:600}
+.n-q em{font-style:normal;font-size:12px;color:#9cc9c1}
+/* điện thoại */
+.nmus.phone .n-top{padding:2px 16px 6px}
+.nmus.phone .n-top h1{font-size:22px}
+.nmus.phone .n-body{padding:4px 12px 20px}
+.nmus.phone .n-pop{right:12px}
+.phone .n-mp{margin:4px 8px 6px}
+/* tối */
+.dk .nmus{--n-bg:#1b1d1f;--n-soft:#23262a}

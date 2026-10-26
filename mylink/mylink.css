@@ -1,0 +1,253 @@
+/* CHEP TU myLink v0.18.1 src/renderer/styles/main.css (dong 84-het) — bien mau dat tren .mlhost thay vi :root.
+   Sang = theme LIGHT cua myLink, Toi = theme DARK cua myLink. KHONG sua tay: chep lai khi myLink doi. */
+.mlhost{--accent:#60a5fa;--accent-soft:rgba(96,165,250,.16);--accent-line:rgba(96,165,250,.5);--danger:#f87171;--ease:cubic-bezier(.22,.9,.3,1);
+  --green:#16a34a;--green-soft:rgba(22,163,74,.13);--green-line:rgba(22,163,74,.45);--bg:#eef1f7;--bg-2:#fff;--panel:rgba(20,30,55,.035);--panel-2:rgba(20,30,55,.06);
+  --border:rgba(20,30,55,.12);--text:#1b2333;--muted:#5c6675;--input-bg:#fff;--modal-bg:#fff;--topbar-bg:rgba(255,255,255,.85);--glow:rgba(96,165,250,.14);--check-bg:rgba(22,163,74,.14);
+  color:var(--text);font-family:"Segoe UI",system-ui,sans-serif;user-select:none}
+.dk .mlhost{--green:#4ade80;--green-soft:rgba(74,222,128,.14);--green-line:rgba(74,222,128,.5);--bg:#050506;--bg-2:#131316;--panel:rgba(255,255,255,.04);--panel-2:rgba(255,255,255,.075);
+  --border:rgba(255,255,255,.1);--text:#f2f3f5;--muted:#9aa0a6;--input-bg:rgba(255,255,255,.05);--modal-bg:linear-gradient(180deg,#161618,#0b0b0d);--topbar-bg:rgba(8,8,10,.75);--glow:rgba(255,255,255,.05);--check-bg:rgba(74,222,128,.16)}
+.mlhost button,.mlhost input{font-family:inherit;color:inherit}
+/* ---------- module root ---------- */
+.ml-root { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; position: relative; }
+.ml-toolbar { flex: 0 0 auto; display: flex; justify-content: flex-end; gap: 2px; padding: 4px 6px; border-bottom: 1px solid var(--border); }
+.ml-toolbar button { min-width: 30px; height: 28px; border: none; background: transparent; color: var(--muted); border-radius: 7px; font-size: 14px; cursor: pointer; }
+.ml-toolbar button:hover { background: var(--panel-2); color: var(--text); }
+.ml-body { flex: 1 1 auto; min-height: 0; display: flex; }
+
+/* LEFT: days */
+.ml-days { flex: 0 0 130px; min-width: 90px; max-width: 300px; display: flex; flex-direction: column; background: rgba(255,255,255,0.02); }
+.ml-days-list { position: relative; flex: 1 1 auto; overflow-y: auto; padding: 6px 6px 12px; }
+/* v0.8.0: DAI CHON = 1 khoi duy nhat TRUOT giua cac ngay (mau xanh duong cua .selected cu). Nam
+   duoi cac o ngay (z-index 0) nen chu/dau cham van doc duoc. Vi tri dat bang transform trong JS. */
+.ml-day-marker {
+  position: absolute; left: 6px; right: 6px; top: 0; z-index: 0; border-radius: 9px; pointer-events: none;
+  background: linear-gradient(180deg, rgba(96,165,250,.26), rgba(96,165,250,.14));
+  border: 1px solid var(--accent-line); box-shadow: inset 3px 0 0 var(--accent);
+  transition: transform .28s var(--ease), height .28s var(--ease);
+}
+.ml-day-marker[hidden] { display: none; }
+.ml-day-marker.ml-no-anim { transition: none; }   /* dung lai danh sach -> dat tuc thi, khong truot */
+.ml-day { position: relative; z-index: 1; display: flex; align-items: center; gap: 6px; padding: 7px 8px; margin: 2px 0; border: 1px solid transparent; border-radius: 9px; cursor: pointer; color: var(--muted); transition: background .14s var(--ease), border-color .14s var(--ease), color .14s var(--ease); }
+.ml-day:hover { background: var(--panel); color: var(--text); }
+.ml-d-wd { font-weight: 700; font-size: 12px; min-width: 30px; color: var(--text); }
+.ml-d-date { font-size: 12px; }
+.ml-d-dot { margin-left: auto; width: 6px; height: 6px; border-radius: 50%; background: var(--accent); opacity: 0; flex: 0 0 auto; }
+.ml-day.has-content .ml-d-dot { opacity: .9; }
+.ml-day.all-done .ml-d-dot { background: var(--green); }
+.ml-d-today { margin-left: auto; font-size: 8px; text-transform: uppercase; letter-spacing: .5px; color: var(--green); border: 1px solid var(--green-line); border-radius: 5px; padding: 1px 4px; }
+/* TODAY marker = GREEN ; SELECTED = BLUE (khac mau nhau) */
+.ml-day.today { border-color: var(--green-line); background: var(--green-soft); }
+.ml-day.today .ml-d-wd { color: var(--green); }
+/* v0.8.0: nen/vien cua o dang chon do .ml-day-marker ve (de truot duoc) -> o chi doi MAU CHU.
+   Ngay HOM NAY dang duoc chon: bo nen/vien xanh la cua o de khong chong len dai xanh duong
+   (nhan "Today" van xanh la, giong het truoc v0.8.0). */
+.ml-day.selected { color: var(--text); }
+.ml-day.today.selected { background: transparent; border-color: transparent; }
+.ml-day.selected .ml-d-wd { color: var(--accent); }
+.ml-day.today.selected .ml-d-today { color: var(--green); border-color: var(--green-line); }
+
+/* splitter */
+.ml-splitter { flex: 0 0 5px; cursor: col-resize; background: var(--border); opacity: .5; transition: opacity .15s var(--ease), background .15s var(--ease); }
+.ml-splitter:hover, body.ml-resizing .ml-splitter { opacity: 1; background: var(--accent-line); }
+
+/* RIGHT: classes */
+.ml-classes { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; border-left: 1px solid var(--border); }
+.ml-day-title { flex: 0 0 auto; font-size: 15px; font-weight: 700; padding: 12px 14px 8px; }
+.ml-day-title small { color: var(--muted); font-weight: 500; font-size: 12px; margin-left: 6px; }
+.ml-classes-list { flex: 1 1 auto; overflow-y: auto; padding: 2px 12px 22px; display: flex; flex-direction: column; gap: 10px; }
+.ml-empty { color: var(--muted); font-size: 12px; line-height: 1.6; padding: 18px; text-align: center; border: 1px dashed var(--border); border-radius: 12px; margin-top: 6px; }
+.ml-empty b { color: var(--text); }
+
+/* class card */
+.ml-card { border: 1px solid var(--border); border-radius: 12px; background: var(--panel); }
+.ml-card:hover { border-color: rgba(255,255,255,0.15); }
+.ml-card-head { display: flex; align-items: center; gap: 8px; padding: 10px 12px; }
+.ml-card-name { font-weight: 700; font-size: 14px; }
+.ml-card-count { font-size: 11px; color: var(--muted); }
+.ml-tick { flex: 0 0 auto; width: 24px; height: 24px; border-radius: 50%; border: 2px solid var(--border); background: transparent; color: var(--muted); cursor: pointer; font-size: 13px; display: flex; align-items: center; justify-content: center; transition: all .15s var(--ease); }
+.ml-tick:hover { border-color: var(--green); color: var(--green); }
+.ml-card-body { padding: 0 12px 10px; display: flex; flex-direction: column; gap: 8px; }
+
+/* v0.9.0 link row 1 HÀNG: [open][input 60%][NÚT TÊN 40%][up][tick][kebab] — tỉ lệ 60/40 chia phần
+   GIỮA (input + nút tên), các nút hai đầu cỡ cố định nên MỌI nút tên rộng BẰNG NHAU. */
+.ml-link-row { position: relative; display: flex; flex-wrap: wrap; align-items: center; gap: 6px 6px; border-radius: 8px; will-change: transform; }
+/* v0.6.0: ĐÃ TÍCH -> thu gọn: ẨN ô input, chevron trỏ thẳng vào TÊN link trên cùng 1 hàng */
+.ml-link-row.checked input { display: none; }
+.ml-link-row.checked { padding: 1px 0; }
+.ml-link-row.checked .ml-name {
+  order: 2; flex: 1 1 auto; height: auto; padding: 4px 2px; font-size: 12.5px; font-weight: 600;
+  background: transparent; border-color: transparent; text-align: left; letter-spacing: .2px;
+}
+.ml-link-row.checked .ml-name:hover { background: var(--green-soft); }
+.ml-link-row.checked .ml-open { color: var(--green); }
+/* đường kẻ mảnh ngăn nhóm CHƯA tích / ĐÃ tích trong 1 lớp */
+.ml-links-divider { height: 1px; background: var(--border); margin: 3px 2px 1px; animation: ml-fade-in .22s var(--ease); }
+/* NÚT TÊN LINK (v0.9.0) — 40% phần giữa, chữ XANH LÁ, bấm để mở link. Tên dài thì JS (fitName) hạ
+   font-size + letter-spacing cho vừa, KHÔNG cắt "…". */
+.ml-name {
+  order: 3; flex: 4 1 0; min-width: 0; height: 30px; padding: 0 8px; margin: 0;
+  display: inline-flex; align-items: center; justify-content: center;
+  background: var(--green-soft); border: 1px solid var(--green-line); border-radius: 8px;
+  font-size: 11px; font-weight: 700; letter-spacing: .2px; line-height: 1.15;
+  color: var(--green); cursor: pointer; overflow: hidden; white-space: nowrap; text-align: center;
+  text-overflow: ellipsis;   /* chỉ chạm tới khi cửa sổ hẹp hết cỡ mà chữ đã co tới 7px vẫn không vừa */
+}
+.ml-name:hover { background: rgba(74, 222, 128, 0.24); }
+.ml-open { order: 1; flex: 0 0 auto; width: 26px; height: 30px; border: none; background: transparent; color: var(--green); cursor: pointer; border-radius: 7px; display: inline-flex; align-items: center; justify-content: center; }
+.ml-open svg { width: 17px; height: 17px; }
+.ml-open:hover { background: var(--green-soft); }
+.ml-link-row input { order: 2; flex: 6 1 0; min-width: 0; background: var(--input-bg); border: 1px solid var(--border); border-radius: 8px; padding: 7px 10px; font-size: 12px; color: var(--text); transition: border-color .15s var(--ease); user-select: text; }
+.ml-link-row input:focus { outline: none; border-color: var(--accent-line); }
+.ml-link-row input::placeholder { color: var(--muted); opacity: .7; }
+/* v0.9.1: hàng TRAILING ("+ Add a link" còn trống) -> ô nhập chiếm TRỌN phần giữa (100%). Nút TÊN
+   dùng display:NONE (không phải width:0) để tự RA KHỎI flex layout -> 2 khoảng `gap` quanh nó (input-
+   tên + tên-mũi tên lên) GỘP LẠI còn 1, và không còn viền 1px "ma" (border-box co width:0 vẫn giữ lại
+   border) tạo vệt nhỏ ở mép phải ô nhập. Nhập xong (Enter/blur) -> re-render thành hàng thường, tự
+   TÁCH lại 60/40 như cũ (không cần JS, chỉ CSS theo class .trailing). */
+.ml-link-row.trailing input { flex: 1 1 auto; }
+.ml-link-row.trailing .ml-name { display: none; }
+/* v0.15.0: hàng trailing CÓ khả năng tra mã bài (.has-code, xem mylink-ui.js) -> tách lại 60/40 y
+   hệt hàng thường, ô mã đứng vào đúng chỗ nút tên (cùng order:3, nút tên vẫn display:none ở trên). */
+.ml-link-row.trailing.has-code input.ml-link-input { flex: 6 1 0; }
+.ml-link-row.trailing .ml-code-input {
+  order: 3; flex: 4 1 0; min-width: 0; height: 30px; padding: 0 8px; margin: 0;
+  background: var(--input-bg); border: 1px dashed var(--green-line); border-radius: 8px;
+  font-size: 11px; font-weight: 600; letter-spacing: .2px; color: var(--green); text-align: center;
+  transition: border-color .15s var(--ease), color .15s var(--ease);
+}
+.ml-code-input::placeholder { color: var(--green); opacity: .55; text-align: center; }
+.ml-code-input:focus { outline: none; border-style: solid; border-color: var(--green); }
+.ml-code-input:disabled { opacity: .5; }
+/* Gõ mã không thấy trong AWord -> rung nhẹ + viền đỏ 500ms rồi tự thôi (JS gỡ class), chữ đã gõ GIỮ
+   NGUYÊN để thầy sửa lại — không phải trạng thái chờ hành động bắt buộc nên keyframes là an toàn. */
+.ml-code-input.ml-err { border-style: solid; border-color: var(--danger); color: var(--danger); animation: ml-shake-err .32s var(--ease); }
+@keyframes ml-shake-err { 10%, 90% { transform: translateX(-1px); } 20%, 80% { transform: translateX(2px); } 30%, 50%, 70% { transform: translateX(-3px); } 40%, 60% { transform: translateX(3px); } }
+/* v0.17.0: ô link báo TẠM "No acts found" (mã gõ ở ô Open Link chưa có act AWord) — placeholder đỏ
+   nghiêng + con trỏ pointer gợi ý đúp-chuột mở trang AWord để tạo act. Không lưu trạng thái này. */
+.ml-link-row input.ml-no-acts::placeholder { color: var(--danger); opacity: .8; font-style: italic; }
+.ml-link-row input.ml-no-acts { cursor: pointer; }
+.ml-up { order: 4; flex: 0 0 auto; width: 26px; height: 30px; border: none; background: transparent; color: var(--green); cursor: pointer; border-radius: 7px; display: inline-flex; align-items: center; justify-content: center; }
+.ml-up svg { width: 16px; height: 16px; }
+.ml-up:hover { background: var(--green-soft); }
+.ml-up:disabled { opacity: .28; cursor: default; }
+.ml-up:disabled:hover { background: transparent; }
+.ml-link-tick { order: 5; flex: 0 0 auto; width: 22px; height: 22px; border-radius: 50%; border: 2px solid var(--border); background: transparent; color: #06210f; cursor: pointer; font-size: 12px; display: flex; align-items: center; justify-content: center; transition: all .15s var(--ease); }
+.ml-link-tick:hover { border-color: var(--green); }
+.ml-link-tick.on { border-color: var(--green); background: var(--green); }
+.ml-kebab { order: 6; flex: 0 0 auto; width: 22px; height: 24px; border: none; background: transparent; color: var(--muted); cursor: pointer; font-size: 15px; line-height: 1; border-radius: 6px; }
+.ml-kebab:hover { background: var(--panel-2); color: var(--text); }
+.ml-link-menu { position: absolute; top: 100%; right: 0; margin-top: 3px; z-index: 20; background: var(--modal-bg); border: 1px solid var(--border); border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.4); overflow: hidden; }
+.ml-link-menu-del { display: block; width: 100%; padding: 7px 16px; border: none; background: transparent; color: var(--danger); font-size: 12px; text-align: left; cursor: pointer; white-space: nowrap; }
+.ml-link-menu-del:hover { background: rgba(248,113,113,0.14); }
+
+/* ---------- ANIMATION (v0.6.0) — chuyển động mượt toàn app ---------- */
+@keyframes ml-fade-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes ml-fade-out { from { opacity: 1; } to { opacity: 0; } }
+@keyframes ml-rise-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+@keyframes ml-sink-out { from { opacity: 1; transform: none; } to { opacity: 0; transform: translateY(6px); } }
+.ml-flip-in { animation: ml-rise-in .26s var(--ease); }          /* hàng/thẻ MỚI hiện lên */
+.ml-row-out { opacity: 0; transform: translateX(10px); transition: opacity .15s var(--ease), transform .15s var(--ease); } /* hàng bị xóa */
+.ml-swap-in { animation: ml-rise-in .24s var(--ease); }          /* đổi ngày -> cột lớp hiện vào */
+/* v0.9.0: đổi ngày -> nội dung TRƯỢT THEO HƯỚNG (chọn ngày dưới = dâng lên, ngày trên = đổ xuống) */
+@keyframes ml-slide-up-in { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
+@keyframes ml-slide-down-in { from { opacity: 0; transform: translateY(-16px); } to { opacity: 1; transform: none; } }
+.ml-swap-up { animation: ml-slide-up-in .28s var(--ease); }
+.ml-swap-down { animation: ml-slide-down-in .28s var(--ease); }
+.ml-card { transition: background .2s var(--ease), border-color .2s var(--ease), box-shadow .2s var(--ease); }
+.ml-name, .ml-open, .ml-up, .ml-kebab { transition: background .15s var(--ease), color .18s var(--ease), opacity .18s var(--ease), transform .15s var(--ease); }
+.ml-open:active, .ml-up:active:not(:disabled), .ml-link-tick:active, .ml-tick:active { transform: scale(.88); }
+.ml-link-menu { animation: ml-rise-in .16s var(--ease); }
+.ml-theme-btn:active, .ml-btn-accent:active { transform: scale(.97); }
+.ml-btn-accent { transition: background .15s var(--ease), transform .12s var(--ease); }
+@media (prefers-reduced-motion: reduce) {
+  .ml-flip-in, .ml-swap-in, .ml-swap-up, .ml-swap-down, .ml-link-menu, .ml-links-divider, .ml-code-input.ml-err { animation: none; }
+  .ml-settings-overlay.in, .ml-settings-overlay.in .ml-modal, .ml-settings-overlay.out .ml-modal { animation: none; }
+  * { transition-duration: .001ms !important; }
+}
+
+/* done card */
+.ml-card.done { background: var(--green-soft); border-color: var(--green-line); }
+.ml-card.done .ml-tick { border-color: var(--green); background: var(--green); color: #06210f; } /* tick XANH tại chỗ (góc phải), không dồn card */
+
+/* ---------- settings overlay (absolute trong module) ---------- */
+/* ANIMATION dùng KEYFRAMES chứ không phải transition-từ-trạng-thái-ẩn: trạng thái TĨNH luôn là
+   trạng thái ĐÚNG (hiện đủ), animation chỉ là đường đi tới đó -> cửa sổ ẩn/không render khiến
+   animation không chạy thì hộp thoại vẫn HIỆN bình thường, không bao giờ kẹt vô hình. */
+.ml-settings-overlay { position: absolute; inset: 0; z-index: 50; background: rgba(4,8,16,0.62); backdrop-filter: blur(3px); display: flex; align-items: center; justify-content: center; padding: 12px; }
+.ml-settings-overlay.in { animation: ml-fade-in .18s var(--ease); }
+.ml-settings-overlay.in .ml-modal { animation: ml-rise-in .22s var(--ease); }
+.ml-settings-overlay.out { animation: ml-fade-out .16s var(--ease) forwards; }
+/* v0.8.0: dong Settings -> hop thoai CHIM XUONG thay vi bien mat phut */
+.ml-settings-overlay.out .ml-modal { animation: ml-sink-out .16s var(--ease) forwards; }
+.ml-settings-overlay[hidden] { display: none; }
+.ml-modal { width: 100%; max-width: 560px; max-height: 100%; display: flex; flex-direction: column; background: var(--modal-bg); border: 1px solid var(--border); border-radius: 14px; box-shadow: 0 20px 60px rgba(0,0,0,0.55); }
+.ml-set-note { font-size: 11px; color: var(--muted); margin-top: 7px; }
+.ml-modal-head { display: flex; align-items: center; justify-content: space-between; padding: 12px 14px; border-bottom: 1px solid var(--border); font-weight: 700; font-size: 14px; }
+.ml-modal-head button { border: none; background: transparent; color: var(--muted); cursor: pointer; font-size: 14px; border-radius: 6px; width: 28px; height: 28px; }
+.ml-modal-head button:hover { background: var(--panel-2); color: var(--text); }
+.ml-modal-body { padding: 6px 14px 10px; overflow-y: auto; }
+.ml-set-section { padding: 10px 0; border-bottom: 1px solid var(--border); }
+.ml-set-section:last-child { border-bottom: none; }
+.ml-set-title { font-size: 11px; text-transform: uppercase; letter-spacing: .7px; color: var(--muted); margin-bottom: 8px; }
+.ml-set-classes { display: flex; flex-direction: column; gap: 6px; margin-bottom: 10px; }
+.ml-chip { display: flex; align-items: center; gap: 4px; background: var(--panel-2); border: 1px solid var(--border); border-radius: 8px; padding: 4px 6px; will-change: transform; }
+.ml-chip-mv, .ml-chip-del { transition: background .15s var(--ease), color .15s var(--ease), transform .12s var(--ease); }
+.ml-chip-mv:active:not(:disabled), .ml-chip-del:active, .ml-switch:active { transform: scale(.9); }
+.ml-sched-cb { transition: transform .12s var(--ease); }
+.ml-sched-cb:active { transform: scale(.88); }
+.ml-chip-mv { border: none; background: transparent; color: var(--muted); cursor: pointer; font-size: 10px; width: 20px; height: 22px; border-radius: 5px; }
+.ml-chip-mv:hover:not(:disabled) { background: var(--accent-soft); color: var(--accent); }
+.ml-chip-mv:disabled { opacity: .3; cursor: default; }
+.ml-chip input { background: transparent; border: none; flex: 1 1 auto; min-width: 0; font-size: 13px; font-weight: 600; user-select: text; }
+.ml-chip input:focus { outline: none; }
+.ml-chip-del { border: none; background: transparent; color: var(--muted); cursor: pointer; font-size: 13px; border-radius: 5px; width: 22px; height: 22px; }
+.ml-chip-del:hover { background: rgba(248,113,113,0.16); color: var(--danger); }
+.ml-set-add-row { display: flex; gap: 6px; }
+.ml-set-add-row input { flex: 1 1 auto; min-width: 0; background: var(--input-bg); border: 1px solid var(--border); border-radius: 8px; padding: 7px 10px; font-size: 13px; color: var(--text); user-select: text; }
+.ml-set-add-row input:focus { outline: none; border-color: var(--accent-line); }
+.ml-btn-accent { border: 1px solid var(--accent-line); background: var(--accent-soft); color: var(--accent); border-radius: 8px; padding: 7px 13px; font-size: 12px; font-weight: 600; cursor: pointer; white-space: nowrap; }
+.ml-btn-accent:hover { background: rgba(96,165,250,0.26); }
+.ml-set-schedule { overflow-x: auto; }
+.ml-sched { border-collapse: collapse; width: 100%; font-size: 12px; }
+.ml-sched th, .ml-sched td { padding: 6px 4px; text-align: center; border-bottom: 1px solid var(--border); }
+.ml-sched th:first-child, .ml-sched td:first-child { text-align: left; font-weight: 700; }
+.ml-sched th { color: var(--muted); font-weight: 600; font-size: 11px; }
+.ml-sched td.ml-today-col, .ml-sched th.ml-today-col { background: var(--green-soft); }
+.ml-sched-cb { width: 16px; height: 16px; accent-color: var(--accent); cursor: pointer; }
+.ml-sched-empty { color: var(--muted); font-size: 12px; padding: 8px 2px; }
+.ml-modal-foot { display: flex; align-items: center; justify-content: flex-end; padding: 10px 14px; border-top: 1px solid var(--border); }
+
+/* toast */
+.ml-toast { position: absolute; left: 50%; bottom: 16px; transform: translateX(-50%); background: rgba(20,28,44,0.96); border: 1px solid var(--border); color: var(--text); padding: 8px 14px; border-radius: 9px; font-size: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); z-index: 60; }
+.ml-toast.in { animation: ml-toast-in .2s var(--ease); }
+.ml-toast.out { animation: ml-fade-out .2s var(--ease) forwards; }
+@keyframes ml-toast-in { from { opacity: 0; transform: translate(-50%, 10px); } to { opacity: 1; transform: translateX(-50%); } }
+.ml-toast[hidden] { display: none; }
+
+/* bang bao dang chay bang FILE LUU TAM (v0.14.1) - xem chu thich o mylink-ui.js */
+.ml-banner { flex: 0 0 auto; padding: 7px 12px; font-size: 11.5px; line-height: 1.35; color: #ffd9a8; background: rgba(120,72,16,0.42); border-bottom: 1px solid rgba(255,176,80,0.38); }
+.ml-banner[hidden] { display: none; }
+
+/* brand — footer cột NGÀY, sát góc dưới-trái (v0.5.0) */
+.ml-brand { flex: 0 0 auto; display: flex; align-items: center; padding: 8px 8px 9px 10px; border-top: 1px solid var(--border); }
+.ml-brand[hidden] { display: none; }
+.ml-brand-tx { min-width: 0; line-height: 1.2; }
+.ml-brand-tx b { font-size: 12.5px; font-weight: 700; color: var(--text); }
+.ml-brand-tx i { font-style: normal; color: var(--muted); font-size: 10px; margin-left: 3px; }
+.ml-brand-sub { display: block; font-size: 8.5px; letter-spacing: 1.5px; color: var(--muted); text-transform: uppercase; margin-top: 1px; }
+
+/* tray toggle switch (Settings, standalone) */
+.ml-switch-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.ml-switch-label { font-size: 13px; color: var(--text); }
+.ml-switch { position: relative; flex: 0 0 auto; width: 42px; height: 24px; border-radius: 12px; border: 1px solid var(--border); background: var(--panel-2); cursor: pointer; padding: 0; transition: background .15s var(--ease), border-color .15s var(--ease); }
+.ml-switch-knob { position: absolute; top: 2px; left: 2px; width: 18px; height: 18px; border-radius: 50%; background: var(--muted); transition: transform .16s var(--ease), background .16s var(--ease); }
+.ml-switch.on { background: var(--accent-soft); border-color: var(--accent-line); }
+.ml-switch.on .ml-switch-knob { transform: translateX(18px); background: var(--accent); }
+
+/* theme picker (Settings) */
+.ml-theme-row { display: flex; gap: 6px; }
+.ml-theme-btn { flex: 1 1 0; padding: 8px 6px; border: 1px solid var(--border); background: var(--panel-2); color: var(--muted); border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; transition: all .15s var(--ease); }
+.ml-theme-btn:hover { color: var(--text); }
+.ml-theme-btn.active { border-color: var(--accent-line); background: var(--accent-soft); color: var(--accent); }
+
+/* scrollbar */

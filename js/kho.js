@@ -54,8 +54,19 @@ async function emailTuId(id) {
   const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(chuan));
   return [...new Uint8Array(buf)].map((b) => ('0' + b.toString(16)).slice(-2)).join('').slice(0, 24) + DUOI_QT;
 }
+// (v2.6.0) MẤT MẠNG: không làm mới được vé ⇒ đọc quyền + giờ đăng nhập từ vé cũ cất trong máy (chỉ để mở bộ đệm trong máy;
+// dữ liệu trên mạng vẫn do luật Firestore/Storage giữ — có mạng lại Firebase tự làm mới vé).
+function veCu(u) {
+  try {
+    const tk = u.toJSON().stsTokenManager.accessToken;
+    const p = JSON.parse(atob(tk.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')));
+    return { claims: p, authTime: new Date(p.auth_time * 1000).toUTCString() };
+  } catch (e) { return null; }
+}
 async function coQuyen(u) {
-  const t = await u.getIdTokenResult(true);
+  let t;
+  try { t = await u.getIdTokenResult(true); }
+  catch (e) { if (!/network/.test((e && (e.code || e.message)) || '')) throw e; t = veCu(u); if (!t) throw e; }
   if (t.claims.thay !== true) { await signOut(auth); throw new Error('chua-cap-quyen'); }
   const luc = Date.parse(t.authTime);
   if (luc && Date.now() - luc > NHO_TOI_DA) { await signOut(auth); throw new Error('het-60-ngay'); }

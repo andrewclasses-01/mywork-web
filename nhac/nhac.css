@@ -104,3 +104,33 @@
 .phone .n-mp{margin:4px 8px 6px}
 /* tối */
 .dk .nmus{--n-bg:#1b1d1f;--n-soft:#23262a}
+/* (v2.6.0) nghe offline — mẫu thiet-ke/mau-nhac-offline-v1 */
+.n-btn:disabled{opacity:.4;cursor:default}
+.n-btn.tai{background:var(--acl)!important;color:var(--ac2)!important}
+.n-btn.tai.xong{background:var(--n-soft)!important;color:var(--mu)!important;opacity:1}
+.n-dl{width:34px;height:34px;border-radius:9px;display:grid;place-items:center;color:var(--mu);position:relative;flex:none}
+.n-dl:hover{background:var(--n-soft)}
+.n-dl.xong{color:var(--ac)}
+.n-vong{position:absolute;inset:5px;width:24px;height:24px;transform:rotate(-90deg)}
+.n-vong circle{fill:none;stroke-width:2.5}
+.n-dung{width:8px;height:8px;border-radius:2px;background:var(--ac)}
+.n-row.tat{opacity:.38}
+.n-row.tat .n-dl{visibility:hidden}
+.n-may{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:12px;background:var(--n-soft);margin-bottom:12px;font-size:12.5px;font-weight:600;color:var(--mu)}
+.n-may>svg.i{width:17px;height:17px;color:var(--ac)}
+.n-may b{color:var(--tx);font-weight:800}
+.n-mayt{flex:1;min-width:0}
+.n-thanh{height:6px;border-radius:99px;background:var(--li);overflow:hidden;margin-top:5px}
+.n-thanh i{display:block;height:100%;background:var(--ac);border-radius:99px}
+.n-may button{color:var(--ac);font-weight:700;font-size:12.5px;padding:6px 4px}
+.n-mat{display:flex;align-items:center;gap:8px;margin-bottom:10px;padding:9px 12px;border-radius:12px;background:#fff7ed;color:#9a3412;font-size:12.5px;font-weight:700}
+.n-mat svg.i{width:16px;height:16px}
+.n-pop .n-tu{display:flex;align-items:center;gap:10px}
+.n-gat{margin-left:auto;width:38px;height:22px;border-radius:99px;background:#cbd5e1;position:relative;flex:none}
+.n-gat::after{content:'';position:absolute;top:2px;left:2px;width:18px;height:18px;border-radius:50%;background:#fff;transition:left .15s}
+.n-gat.on{background:var(--ac)}.n-gat.on::after{left:18px}
+.n-tic{display:inline-grid;place-items:center;width:13px;height:13px;border-radius:50%;background:#14a08e;color:#fff;margin-right:4px;vertical-align:-2px}
+.n-tic svg.i{width:9px!important;height:9px!important;stroke-width:3.5}
+.n-tt span .n-tic{flex:none}
+.dk .n-mat{background:#3a2412;color:#fdba74}
+.nmus.phone .n-row{gap:4px;padding-right:2px}

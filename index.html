@@ -2367,6 +2367,8 @@ setInterval(()=>{if(ymd(new Date())!==TODAY&&!frame.querySelector(':focus'))loca
 /* phép thử tự động (Claude): đăng nhập bằng vé TÀI KHOẢN THỬ ZTEST — không dùng mật khẩu thật */
 /* (v2.5.1) iPhone bo qua user-scalable=no o Safari => chan them cu chi chum 2 ngon (gesture*) va vuot 2 ngon */
 ['gesturestart','gesturechange','gestureend'].forEach(ev=>document.addEventListener(ev,e=>e.preventDefault(),{passive:false}));
+// (v2.6.0) mở app khi MẤT MẠNG: service worker (chỉ bản web https / localhost — Electron mywork:// không dùng)
+if('serviceWorker' in navigator&&(location.protocol==='https:'||/^(localhost|127.0.0.1)$/.test(location.hostname)))navigator.serviceWorker.register('sw.js').catch(e=>console.warn('[sw]',e));
 document.addEventListener('touchmove',e=>{if(e.touches&&e.touches.length>1)e.preventDefault();},{passive:false});
 window.__thu=tok=>S.dangVao?Promise.resolve():window.KHO.thuToken(tok).then(batDau);
 if(window.mywork){window.mywork.getVersion().then(v=>S.ver=v).catch(()=>{});if(window.mywork.getAutostart)window.mywork.getAutostart().then(v=>S.autoMin=v).catch(()=>{});}

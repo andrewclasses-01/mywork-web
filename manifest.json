@@ -1,7 +1,8 @@
 {
+  "id": "/mywork-app",
   "name": "myWork",
   "short_name": "myWork",
-  "start_url": "./",
+  "start_url": "./?app=mywork",
   "scope": "./",
   "display": "standalone",
   "background_color": "#0E7C6E",

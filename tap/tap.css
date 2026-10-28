@@ -192,15 +192,6 @@
 .t-big .r{display:flex;gap:10px;color:#fff;font-size:13px;align-items:center}
 .t-big button{background:#ffffff22;color:#fff;border-radius:9px;padding:8px 14px;font-weight:600}
 .t-big button.red{background:#dc2626}
-/* hẹn giờ nghỉ */
-.t-rest{position:absolute;left:50%;bottom:18px;width:min(420px,calc(100% - 24px));z-index:9;background:#0f2f2b;color:#fff;border-radius:16px;padding:10px 12px 12px 16px;display:flex;align-items:center;gap:8px;
-  transform:translate(-50%,30px);opacity:0;pointer-events:none;transition:transform .25s var(--ease),opacity .2s;overflow:hidden;box-shadow:0 12px 30px rgba(15,23,42,.3)}
-.t-rest.on{transform:translate(-50%,0);opacity:1;pointer-events:auto}
-.t-rest .k{font-size:12px;color:#9cc9c1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:170px}
-.t-rest .t{font-size:26px;font-weight:700;font-variant-numeric:tabular-nums;line-height:1.1}
-.t-rest button{background:#1b4540;color:#fff;border-radius:10px;padding:0 11px;height:40px;font-size:13.5px;font-weight:600;flex:none}
-.t-rest button.ok{background:#14a08e}
-.t-rest .bar{position:absolute;left:0;bottom:0;height:4px;background:#5eead4;transition:width .25s linear}
 .t-pnav{display:none}
 /* ================= ĐIỆN THOẠI ================= */
 .tp.phone .t-head{padding:2px 16px 8px}
@@ -212,7 +203,6 @@
 .t-pnav button{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-size:11px;color:var(--mu);font-weight:500;border-radius:12px}
 .t-pnav button svg.i{width:22px;height:22px}
 .t-pnav button.on{color:var(--ac2);font-weight:700}
-.tp.phone .t-rest{bottom:78px}
 .tp.phone .t-week{gap:2px;margin-bottom:10px}
 .tp.phone .t-wd{padding:6px 0;font-size:11px;gap:3px}
 .tp.phone .t-wd b{font-size:12px}
@@ -271,8 +261,7 @@
 /* chiều cao sửa tại chỗ (Hồ sơ) */
 .t-kvin{display:flex;align-items:center;gap:6px}
 .t-kvin .t-num{width:76px;text-align:right;border-color:transparent;background:var(--t-soft);font-weight:700;padding:5px 8px}
-/* thẻ nằm ở thanh dưới của app (điện thoại) ⇒ ẩn thanh riêng, hạ đồng hồ nghỉ */
+/* thẻ nằm ở thanh dưới của app (điện thoại) ⇒ ẩn thanh riêng */
 .tp.ngoainav .t-pnav{display:none!important}
-.tp.phone.ngoainav .t-rest{bottom:14px}
 .tp.phone.ngoainav .t-body{padding-bottom:40px}
 .t-ch .ax{font-weight:600}

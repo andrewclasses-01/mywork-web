@@ -31,8 +31,9 @@ const homNay = () => { const d = new Date(); return `${d.getFullYear()}-${String
 let API = null, DL = { san: false, bai: [], ds: [] };
 const AU = new Audio(); AU.preload = 'metadata';
 const nho = (() => { try { return JSON.parse(localStorage.getItem('mywork.nhac') || '{}'); } catch (e) { return {}; } })();
-const ghiNho = () => { try { localStorage.setItem('mywork.nhac', JSON.stringify({ id: Q.id, t: Math.floor(AU.currentTime || 0), q: Q.ds, shuf: Q.shuf, rep: Q.rep, vol: AU.volume, ten: Q.ten })); } catch (e) {} };
-const Q = { ds: nho.q || [], id: nho.id || null, shuf: !!nho.shuf, rep: nho.rep || 'het', ten: nho.ten || '', tTiep: nho.t || 0 };
+const ghiNho = () => { try { localStorage.setItem('mywork.nhac', JSON.stringify({ id: Q.id, t: Math.floor(AU.currentTime || 0), q: Q.ds, shuf: Q.shuf, rep: Q.rep, vol: AU.volume, ten: Q.ten, da: [...Q.da] })); } catch (e) {} };
+/* (v2.6.1) Q.da = bài ĐÃ PHÁT trong vòng này ⇒ "bài sau" luôn chọn bài CHƯA phát; phát hết cả danh sách mới sang vòng mới (thầy chốt 28/10) */
+const Q = { ds: [...new Set(nho.q || [])], id: nho.id || null, shuf: !!nho.shuf, rep: nho.rep || 'het', ten: nho.ten || '', tTiep: nho.t || 0, da: new Set(nho.da || []) };
 if (nho.vol != null) AU.volume = nho.vol;
 const V = { xem: 'all', menu: null, hoi: null, tai: [], full: false };
 let THANH = null, FULL = null, TRANG = null, phone = false;
@@ -137,9 +138,9 @@ async function napNguon(b, tu) {
 function phat(id, ds, ten) {
   const b = BAI(id); if (!b) return;
   if (!phatDuoc(id)) { API && API.toast('Bài chưa tải — cần có mạng'); return; }
-  if (ds) { Q.ds = ds.slice(); Q.ten = ten || ''; }
-  if (Q.shuf && ds) { const r = Q.ds.filter((x) => x !== id); for (let i = r.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [r[i], r[j]] = [r[j], r[i]]; } Q.ds = [id, ...r]; }
-  Q.id = id; Q.tTiep = 0;
+  if (ds) { Q.ds = [...new Set(ds)]; Q.ten = ten || ''; Q.da.clear(); }      /* danh sách mới ⇒ vòng mới (bỏ bài trùng) */
+  if (Q.shuf && ds) { const r = Q.ds.filter((x) => x !== id); tron(r); Q.ds = [id, ...r]; }
+  Q.id = id; Q.tTiep = 0; Q.da.add(id);
   napNguon(b, 0);
   phien(); ve();
 }
@@ -152,15 +153,24 @@ function batTat() {
   }
   if (AU.paused) AU.play().catch(() => {}); else AU.pause();
 }
+const tron = (r) => { for (let i = r.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [r[i], r[j]] = [r[j], r[i]]; } return r; };
+const duoc = (id) => !!BAI(id) && phatDuoc(id);          // bài đã xoá khỏi kho thì bỏ qua
 function buoc(n) {
   if (!Q.ds.length) return;
   if (n < 0 && AU.currentTime > 4) { AU.currentTime = 0; return; }
-  let i = Q.ds.indexOf(Q.id);
-  for (let k = 0; k < Q.ds.length; k++) {       // mất mạng: bỏ qua bài chưa tải
-    i += n < 0 ? -1 : 1;
-    if (i >= Q.ds.length) { if (Q.rep === 'khong') { AU.pause(); return; } i = 0; }
-    if (i < 0) i = Q.ds.length - 1;
-    if (phatDuoc(Q.ds[i])) { phat(Q.ds[i]); return; }
+  const N = Q.ds.length, i0 = Math.max(0, Q.ds.indexOf(Q.id));
+  if (n < 0) {                                  // bài trước: lùi 1 bài như cũ (mất mạng: bỏ qua bài chưa tải)
+    for (let k = 1; k < N; k++) { const id = Q.ds[(i0 - k + N) % N]; if (duoc(id)) { phat(id); return; } }
+  } else {
+    /* bài sau: bài kế tiếp CHƯA PHÁT trong vòng này (đi vòng qua đầu danh sách) */
+    for (let k = 1; k < N; k++) { const id = Q.ds[(i0 + k) % N]; if (!Q.da.has(id) && duoc(id)) { phat(id); return; } }
+    /* đã phát hết ⇒ vòng mới: tắt lặp thì dừng; trộn thì trộn lại (bài vừa nghe xếp CUỐI để không nghe lại ngay) */
+    if (Q.rep === 'khong') { AU.pause(); return; }
+    Q.da.clear();
+    if (Q.shuf && N > 1) Q.ds = [...tron(Q.ds.filter((x) => x !== Q.id)), Q.id];
+    const i1 = Q.shuf ? -1 : i0;
+    for (let k = 1; k <= N; k++) { const id = Q.ds[(i1 + k + N) % N]; if ((id !== Q.id || N === 1) && duoc(id)) { phat(id); return; } }
+    if (duoc(Q.id)) { phat(Q.id); return; }
   }
   AU.pause(); API && API.toast('Chưa có bài nào tải về máy');
 }
@@ -350,7 +360,7 @@ function onClick(e) {
     e.stopPropagation();
     if (k === 'pp') batTat(); else if (k === 'next') buoc(1); else if (k === 'prev') buoc(-1);
     else if (k === 'dong') { V.full = false; veFull(); }
-    else if (k === 'shuf') { Q.shuf = !Q.shuf; if (Q.shuf && Q.ds.length > 1) { const r = Q.ds.filter((x) => x !== Q.id); for (let i = r.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [r[i], r[j]] = [r[j], r[i]]; } Q.ds = [Q.id, ...r]; } ghiNho(); veFull(); }
+    else if (k === 'shuf') { Q.shuf = !Q.shuf; if (Q.shuf && Q.ds.length > 1) { const r = tron(Q.ds.filter((x) => x !== Q.id)); Q.ds = [Q.id, ...r]; } ghiNho(); veFull(); }
     else if (k === 'rep') { Q.rep = Q.rep === 'het' ? 'mot' : Q.rep === 'mot' ? 'khong' : 'het'; ghiNho(); veFull(); API.toast(Q.rep === 'het' ? 'Lặp cả danh sách' : Q.rep === 'mot' ? 'Lặp 1 bài' : 'Tắt lặp'); }
     else if (k === 'them') { const f = TRANG && TRANG.querySelector('.n-file'); if (f) { f.value = ''; f.click(); } }
     else if (k === 'dsmoi') { V.hoi = 'dsmoi'; veTrang(); }

@@ -85,17 +85,18 @@ function lastOf(id, day) { for (let d = add(day, -1); d >= START(); d = add(d, -
 function suggest(it, day) {
   const lb = LB(day, it[0]), last = lastOf(it[0], day); if (!last || lb.loai === 'tick') return null;
   const top = topRep(it[2]), kg = Math.max(...last.a.map((x) => +x[0] || 0));
-  if (lb.loai === 'kg') { const all = last.a.length >= setsOf(it, last.day) && last.a.every((x) => +x[1] >= top); return all ? { kg: kg + 2, up: 1, txt: `Lên <b>${vn(kg + 2)} kg</b>` } : { kg, txt: `Giữ <b>${vn(kg)} kg</b> · +1 lần` }; }
+  if (lb.loai === 'kg' && kg) { const all = last.a.length >= setsOf(it, last.day) && last.a.every((x) => +x[1] >= top); return all ? { kg: kg + 2, up: 1, txt: `Lên <b>${vn(kg + 2)} kg</b>` } : { kg, txt: `Giữ <b>${vn(kg)} kg</b> · +1 lần` }; }
   const mx = Math.max(...last.a.map((x) => +x[1] || 0));
-  if (lb.loai === 'lan') return { up: 1, txt: `Thử <b>${mx + 1} lần</b>` };
+  if (lb.loai === 'lan' || lb.loai === 'kg') return { up: 1, txt: `Thử <b>${mx + 1} lần</b>` };
   if (lb.loai === 'giay') return { up: 1, txt: `Thử <b>${mx + 5}s</b>` };
   return null;
 }
-/* số điền sẵn cho ô trống (k: 0 = kg, 1 = lần): hiệp TRƯỚC trong cùng buổi → gợi ý → buổi trước → số mục tiêu */
+/* số điền sẵn cho ô trống (k: 0 = kg, 1 = lần): hiệp TRƯỚC trong cùng buổi → gợi ý → buổi trước → số mục tiêu.
+   (v2.6.1) kg chưa từng có ⇒ null (ô ĐỂ TRỐNG, không điền 0 — thầy chốt 28/10) */
 function soMoi(day, it, i, k) {
   const id = it[0], lb = LB(day, id), a = (LOG[day] && LOG[day].b && LOG[day].b[id]) || [];
-  for (let j = i - 1; j >= 0; j--) { const v = a[j] && a[j][k]; if (v != null && v !== '') return +v; }
-  if (k === 0) { const sg = suggest(it, day), lk = lastOf(id, day); return sg && sg.kg != null ? sg.kg : lk ? +lk.a[0][0] || 0 : 0; }
+  for (let j = i - 1; j >= 0; j--) { const v = a[j] && a[j][k]; if (v != null && v !== '' && !(k === 0 && !+v)) return +v; }
+  if (k === 0) { const sg = suggest(it, day), lk = lastOf(id, day), v = sg && sg.kg ? sg.kg : lk ? +lk.a[0][0] || 0 : 0; return v || null; }
   return lb.loai === 'tick' ? 1 : lb.loai === 'giay' ? lowRep(it[2]) : topRep(it[2]) || 0;
 }
 /* (v2.5.0) Ô SỐ TỰ HIỂU (thầy chốt mẫu v5): gõ không cần dấu phẩy — 634 ⇒ 63,4 kg · 905 ⇒ 90,5 cm · 1m58 / 1,58 ⇒ 158 cm.
@@ -160,7 +161,7 @@ export function tapGan(host, opt) {
   if (H) H.huy();
   const phone = opt && opt.dev === 'phone';
   host.innerHTML = `<div class="tp${phone ? ' phone' : ''}"><div class="t-head" id="tH"></div><div class="t-body" id="tB"></div>
-    <nav class="t-pnav" id="tN"></nav><div class="t-rest" id="tR"></div><div class="t-tipb" id="tT"></div><input type="file" accept="image/*" id="tF" hidden></div>`;
+    <nav class="t-pnav" id="tN"></nav><div class="t-tipb" id="tT"></div><input type="file" accept="image/*" id="tF" hidden></div>`;
   const root = host.firstElementChild, $ = (id) => root.querySelector('#' + id);
   /* (v2.5.0) điện thoại: 4 thẻ vẽ vào THANH DƯỚI của app (opt.nav = #pbar) ⇒ thanh nhạc myMusic nằm ngay trên nó */
   const NAV = (opt && opt.nav) || null;
@@ -169,7 +170,7 @@ export function tapGan(host, opt) {
   if (NAV) NAV.addEventListener('click', onNav);
   if (!S.day) S.day = today();
   const CH = {};
-  let wl = null, R = { end: 0, total: 0, iv: 0 };
+  let wl = null;
 
   /* màn hình luôn sáng khi đang ở trang tập (Wake Lock) */
   async function wake(on) {
@@ -196,10 +197,19 @@ export function tapGan(host, opt) {
     el.innerHTML = TABS.map(([k, l, i]) => `<button data-tab="${k}" class="${S.tab === k ? 'on' : ''}">${ic(i)}${l}</button>`).join('');
   }
   function pill() { const b = $('tTabs') && $('tTabs').querySelector('button.on'), p = $('tPill'); if (!b || !p) return; p.style.width = b.offsetWidth + 'px'; p.style.transform = `translateX(${b.offsetLeft}px)`; }
+  /* (v2.6.1) VÁ TẠI CHỖ: chỉ thay khối con nào ĐỔI (so với chuỗi HTML lần vẽ trước). iPhone Safari: thay cả trang
+     (innerHTML) khi đang gõ/tích ⇒ ô đang chọn bị xoá khỏi trang ⇒ Safari tự cuộn tụt xuống cuối. */
+  let cu = null;          /* { tab, ds: [chuỗi HTML từng khối con] } của lần vẽ trước */
   function body(anim) {
-    const b = $('tB'), y = b.scrollTop;
-    b.innerHTML = { hom: homHtml, tuan: tuanHtml, so: soHtml, hs: hsHtml }[S.tab]();
-    if (anim) { b.classList.remove('t-slide'); void b.offsetWidth; b.classList.add('t-slide'); b.scrollTop = 0; } else b.scrollTop = y;
+    const b = $('tB'), y = b.scrollTop, tmp = document.createElement('div');
+    tmp.innerHTML = { hom: homHtml, tuan: tuanHtml, so: soHtml, hs: hsHtml }[S.tab]();
+    const moi = [...tmp.children], ds = moi.map((el) => el.outerHTML);
+    if (!anim && cu && cu.tab === S.tab && cu.ds.length === ds.length && b.children.length === ds.length) {
+      const goc = [...b.children];
+      ds.forEach((h, i) => { if (h !== cu.ds[i]) goc[i].replaceWith(moi[i]); });
+    } else b.replaceChildren(...moi);
+    cu = { tab: S.tab, ds };
+    if (anim) { b.classList.remove('t-slide'); void b.offsetWidth; b.classList.add('t-slide'); b.scrollTop = 0; } else if (b.scrollTop !== y) b.scrollTop = y;
     if (S.tab === 'so') bindCharts();
   }
   const ve = (anim) => { head(); body(anim); };
@@ -225,7 +235,7 @@ export function tapGan(host, opt) {
     h += `<div class="t-grp">${sessKey(day) === 'NN' ? 'Tối' : 'Chiều'}</div>${s.items.map((it) => exRow(it, day)).join('')}`;
     const isMon = pd(day).getDay() === 1, canDay = [1, 3, 5].includes(pd(day).getDay());
     const mrow = (f, icn, lab, unit, mode, due) => `<label class="t-mrow"><span class="t-mi">${ic(icn)}</span><span class="t-ml">${lab}${due ? '<i class="t-due" title="Hôm nay nên đo"></i>' : ''}</span>
-      <input class="t-num" data-f="${f}" inputmode="${mode}" value="${L[f] != null && L[f] !== '' ? vn(L[f]) : ''}" placeholder="—"><span class="t-mu">${unit}</span></label>${hoiHtml(f)}`;
+      <input class="t-num" data-f="${f}" inputmode="${mode}" value="${+L[f] ? vn(L[f]) : ''}" placeholder="—"><span class="t-mu">${unit}</span></label>${hoiHtml(f)}`;
     h += `<div class="t-card t-ms"><h3>Chỉ số</h3><div class="t-mgrid">
        ${mrow('calo', 'fire', 'Calo tập', 'kcal', 'numeric')}
        ${mrow('buoc', 'walk', 'Số bước', 'bước', 'numeric')}
@@ -264,12 +274,12 @@ export function tapGan(host, opt) {
       sets = `<div class="t-sets"><div class="t-shd"><span></span>${lb.loai === 'kg' ? '<span>kg</span>' : ''}<span>${unit}${it[3] ? ' / bên' : ''}</span></div>${Array.from({ length: Math.max(st.n, a.length) }, (_, i) => {
         const x = a[i] || [], on = x[2];
         return `<div class="t-set${on ? ' dn' : ''}"><span class="t-no"><span class="w">Hiệp </span>${i + 1}</span>
-          ${lb.loai === 'kg' ? stp(i, 0, `<input class="t-num" data-in="${id}|${i}|0" inputmode="decimal" value="${x[0] != null && x[0] !== '' ? vn(x[0]) : ''}" placeholder="${((v) => v ? vn(v) : '')(soMoi(day, it, i, 0))}">`) + '<span class="u"> kg ×</span>' : ''}
+          ${lb.loai === 'kg' ? stp(i, 0, `<input class="t-num" data-in="${id}|${i}|0" inputmode="decimal" value="${+x[0] ? vn(x[0]) : ''}" placeholder="${((v) => v ? vn(v) : '')(soMoi(day, it, i, 0))}">`) + '<span class="u"> kg ×</span>' : ''}
           ${stp(i, 1, `<input class="t-num" data-in="${id}|${i}|1" inputmode="numeric" value="${x[1] != null && x[1] !== '' ? x[1] : ''}" placeholder="${soMoi(day, it, i, 1) || ''}">`)}<span class="u"> ${unit}</span>
           <span class="t-ck${on ? ' on' : ''}" data-sk="${id}|${i}" title="Tích hiệp này"></span></div>`;
       }).join('')}<div><button class="t-addset" data-add="${id}">+ Hiệp</button></div></div>`;
     }
-    const lastTxt = last && lb.loai !== 'tick' ? `${dm(last.day)}: ${last.a.map((x) => lb.loai === 'kg' ? `${vn(x[0])}×${x[1]}` : x[1]).join(' · ')}` : '';
+    const lastTxt = last && lb.loai !== 'tick' ? `${dm(last.day)}: ${last.a.map((x) => lb.loai === 'kg' && +x[0] ? `${vn(x[0])}×${x[1]}` : x[1]).join(' · ')}` : '';
     const tg = lb.loai === 'tick' && st.n === 1 ? it[2] : `${st.n} × ${it[2]}`;
     return `<div class="t-ex${st.done ? ' dn' : ''}${open ? ' op' : ''}">
       <div class="t-exh" data-tog="${id}"><span class="t-ck${st.done ? ' on' : pct ? ' part' : ''}" style="--p:${pct}%" data-ckall="${id}" title="Tích cả bài"></span>
@@ -417,7 +427,7 @@ export function tapGan(host, opt) {
     Object.keys(LOG).sort().filter((d) => d >= START() && d <= t).forEach((d) => {
       const L = LOG[d], se = sessOf(d);
       s += `- ${WD[pd(d).getDay()]} ${dm(d)} · ${se ? se.ten : '?'} · ${dayPct(d)}% · sáng ${L.sang ? '✓' : '✗'} · calo ${L.calo || '—'} · bước ${L.buoc || '—'}${L.can ? ' · cân ' + L.can : ''}${L.vb ? ' · bụng ' + L.vb : ''}${L.cg ? ' · cảm giác ' + L.cg + '/5' : ''}${L.gc ? ' · "' + L.gc + '"' : ''}\n`;
-      Object.keys(L.b || {}).forEach((id) => { const lb = all[id]; if (!lb || lb.loai === 'tick') return; const a = L.b[id].filter((x) => x && x[2]); if (a.length) s += `  - ${lb.ten}: ${a.map((x) => lb.loai === 'kg' ? x[0] + '×' + x[1] : x[1]).join(', ')}\n`; });
+      Object.keys(L.b || {}).forEach((id) => { const lb = all[id]; if (!lb || lb.loai === 'tick') return; const a = L.b[id].filter((x) => x && x[2]); if (a.length) s += `  - ${lb.ten}: ${a.map((x) => lb.loai === 'kg' && +x[0] ? x[0] + '×' + x[1] : x[1]).join(', ')}\n`; });
     });
     const xong = () => API.toast(`Đã chép báo cáo (${s.split('\n').length} dòng)`);
     if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(s).then(xong, () => API.toast('Không chép được'));
@@ -487,26 +497,7 @@ export function tapGan(host, opt) {
     S.dangTai = false; body();
   }
 
-  /* ── hẹn giờ nghỉ ── */
-  function restSec(id, day) { const s = sessOf(day), k = s.items.findIndex((x) => x[0] === id); return LB(day, id).loai === 'giay' ? 45 : k < 2 ? 90 : 60; }
-  function startRest(sec, next) {
-    R.total = sec; R.end = Date.now() + sec * 1000; clearInterval(R.iv);
-    $('tR').innerHTML = `<div style="min-width:0"><div class="k">Tiếp: ${esc(next)}</div><div class="t">0:00</div></div><span style="margin-left:auto"></span>
-      <button data-rs="-15">−15</button><button data-rs="15">+15</button><button class="ok" data-rs="x">Tập</button><i class="bar"></i>`;
-    $('tR').classList.add('on'); tickRest(); R.iv = setInterval(tickRest, 250);
-  }
-  function tickRest() {
-    const el = $('tR'); if (!el || !el.isConnected) return clearInterval(R.iv);
-    const left = Math.max(0, Math.ceil((R.end - Date.now()) / 1000));
-    el.querySelector('.t').textContent = `${Math.floor(left / 60)}:${pad(left % 60)}`; el.querySelector('.bar').style.width = (100 * left / R.total) + '%';
-    if (left <= 0) { stopRest(); if (navigator.vibrate) navigator.vibrate([300, 150, 300]); API.toast('Hết giờ nghỉ!'); }
-  }
-  function stopRest() { clearInterval(R.iv); const el = $('tR'); if (el) el.classList.remove('on'); }
-  function nextLabel(id, i, day) {
-    const s = sessOf(day), it = s.items.find((x) => x[0] === id), st = exState(day, it);
-    if (!st.done) return `Hiệp ${Math.min(i + 2, st.n)} · ${LB(day, id).ten}`;
-    const nx = s.items.find((x) => !exState(day, x).done); return nx ? LB(day, nx[0]).ten : '';
-  }
+  /* (v2.6.1) BỎ pop-up đếm giờ nghỉ "Tiếp: hiệp x" (thầy không dùng — 28/10) */
 
   /* ── thao tác ── */
   const itemOf = (day, id) => sessOf(day).items.find((x) => x[0] === id);
@@ -517,7 +508,6 @@ export function tapGan(host, opt) {
     if (T.closest('[data-a="wake"]')) { S.wake = !S.wake; nho.wake = S.wake; ghiNho(); wake(S.wake); head(); API.toast(S.wake ? 'Giữ sáng màn hình: BẬT' : 'Giữ sáng màn hình: TẮT'); return; }
     if (T.closest('[data-a="homnay"]')) { S.day = today(); ve(); return; }
     if (T.closest('[data-a="report"]')) return report();
-    const rs = T.closest('[data-rs]'); if (rs) { const v = rs.dataset.rs; if (v === 'x') return stopRest(); R.end += +v * 1000; R.total = Math.max(R.total, Math.ceil((R.end - Date.now()) / 1000)); tickRest(); return; }
     const dy = T.closest('[data-day]'); if (dy) { S.day = dy.dataset.day; ve(); return; }
     const gd = T.closest('[data-goday]'); if (gd) { S.day = gd.dataset.goday; S.tab = 'hom'; ve(true); return; }
     /* ảnh */
@@ -543,7 +533,7 @@ export function tapGan(host, opt) {
       const [id, i, k, dir] = stb.dataset.st.split('|'), L = lg(day), a = L.b[id] || (L.b[id] = []), lb = LB(day, id), it = itemOf(day, id);
       while (a.length <= +i) a.push([]); const x = a[+i];
       /* ô trống: lần bấm đầu = điền số gợi ý; sau đó mỗi bấm đổi 1 kg / 1 lần / 5 giây */
-      if (x[+k] == null || x[+k] === '') x[+k] = soMoi(day, it, +i, +k);
+      if (x[+k] == null || x[+k] === '' || (+k === 0 && !+x[+k])) { const v = soMoi(day, it, +i, +k); x[+k] = v != null ? v : +dir > 0 ? 1 : null; }
       else x[+k] = Math.max(0, +(+x[+k] + (+k === 1 && lb.loai === 'giay' ? 5 : 1) * +dir).toFixed(1));
       doi(); body(); return;
     }
@@ -560,7 +550,7 @@ export function tapGan(host, opt) {
       doi(); body();
       const ck = root.querySelector(`[data-sk="${id}|${i}"]`); if (ck) ck.classList.add('just');
       if (exState(day, it).done && x[2]) { const c2 = root.querySelector(`[data-ckall="${id}"]`); if (c2) c2.classList.add('just'); }
-      if (x[2] && day === today() && lb.loai !== 'tick') { const nx = nextLabel(id, +i, day); if (nx) startRest(restSec(id, day), nx); else { stopRest(); API.toast('Xong buổi! 💪'); } }
+      if (x[2] && day === today() && lb.loai !== 'tick' && !sessOf(day).items.some((y) => !exState(day, y).done)) API.toast('Xong buổi! 💪');
       return;
     }
     const ca = T.closest('[data-ckall]'); if (ca) {
@@ -596,7 +586,17 @@ export function tapGan(host, opt) {
     }
     if (khoa(S.day)) { body(); return; }
     const L = lg(S.day), num = (s) => { const v = String(s).replace(',', '.').trim(); return v === '' || isNaN(+v) ? null : +v; };
-    if (t.dataset.in) { const [id, i, k] = t.dataset.in.split('|'), a = L.b[id] || (L.b[id] = []); while (a.length <= +i) a.push([]); a[+i][+k] = num(t.value); doi(); body(); return; }
+    if (t.dataset.in) {
+      const [id, i, k] = t.dataset.in.split('|'), a = L.b[id] || (L.b[id] = []); while (a.length <= +i) a.push([]); a[+i][+k] = num(t.value); doi();
+      /* (v2.6.1) KHÔNG vẽ lại (iPhone: nút ‹ › trên bàn phím đã nhảy sang ô kế, vẽ lại là xoá mất ô đó ⇒ trang tụt xuống cuối):
+         chỉ sửa số mờ gợi ý ở các hiệp SAU của bài này */
+      const it = itemOf(S.day, id);
+      root.querySelectorAll('input[data-in]').forEach((o) => {
+        const [id2, j, k2] = o.dataset.in.split('|'); if (id2 !== id || k2 !== k || +j <= +i) return;
+        const v = soMoi(S.day, it, +j, +k); o.placeholder = v ? (+k === 0 ? vn(v) : String(v)) : '';
+      });
+      return;
+    }
     if (t.dataset.f === 'can' || t.dataset.f === 'vb') {          /* cân · vòng bụng: tự hiểu + hỏi lại khi lệch */
       const f = t.dataset.f, v0 = t.value.trim(); S.hoi = S.hoi || {};
       if (!v0) { delete S.hoi[f]; delete L[f]; doi(); body(); return; }
@@ -604,7 +604,7 @@ export function tapGan(host, opt) {
       if (r.loi || r.hoi) { S.hoi[f] = r; body(); return; }
       delete S.hoi[f]; luuSo(f, r.v); return;
     }
-    if (t.dataset.f) { const v = t.dataset.f === 'gc' ? t.value.trim() : num(t.value); if (v == null || v === '') delete L[t.dataset.f]; else L[t.dataset.f] = v; doi(); if (t.dataset.f !== 'gc') body(); }
+    if (t.dataset.f) { const v = t.dataset.f === 'gc' ? t.value.trim() : num(t.value); if (v == null || v === '') delete L[t.dataset.f]; else L[t.dataset.f] = v; doi(); }
   }
   /* lưu số đã hiểu: cân/vòng bụng vào nhật ký ngày · chiều cao vào hồ sơ */
   function luuSo(f, v) {
@@ -628,7 +628,7 @@ export function tapGan(host, opt) {
     /* kho vừa đổi (máy khác / tiếng vọng): đang gõ dở thì đợi rời ô */
     veTuXa() { const f = document.activeElement; if (f && root.contains(f) && f.matches('input')) { f.addEventListener('blur', () => setTimeout(() => H && H.host === host && ve(), 0), { once: true }); return; } ve(); },
     vePnav,
-    huy() { stopRest(); wake(false); dungHinh(); if (NAV) NAV.removeEventListener('click', onNav); document.removeEventListener('visibilitychange', onVis); removeEventListener('resize', onRs); if (H && H.host === host) H = null; },
+    huy() { wake(false); dungHinh(); if (NAV) NAV.removeEventListener('click', onNav); document.removeEventListener('visibilitychange', onVis); removeEventListener('resize', onRs); if (H && H.host === host) H = null; },
   };
   return H;
 }

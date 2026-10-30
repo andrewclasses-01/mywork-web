@@ -52,3 +52,39 @@ export const SESS={
  NN:{ten:'Nghỉ chủ động',phu:'Đi bộ · giãn cơ · 18h',ic:'leaf',phut:55,items:[['iw40',1,'40 phút'],['strc',1,'15 phút']]}
 };
 export const BYDOW=['NN','TA','DA','CD','TB','DB','TT'];
+
+/* ───── GIÁO ÁN v2 (thầy duyệt 30/10/2026, áp từ T2 2/11) ─────
+   Máy chạy dốc CỐ ĐỊNH 8% (chỉ đi, không chạy) · đạp đồi CHIỀU T3 + T7 (2 km tới chân đồi + leo 3 km) · T7 trên đỉnh có xà chắc ⇒ vòng xà
+   · xà/ghế ở nhà lung lay ⇒ bỏ treo xà nâng chân / co gối / bước lên ghế · buổi sáng T2–T7 chọn đi bộ HOẶC đạp xe.
+   Buổi mới có thể có `mua` = danh sách bài thay khi trời mưa (thầy bật nút ☔ trong ngày) · `buoi` = nhãn nhóm (Sáng/Chiều) · `ngan` = tên ngắn ở thẻ Tuần. */
+export const LIB2 = {
+ ...LIB,
+ hill:{ten:'Đạp xe lên đồi',loai:'tick',cach:['Đạp nhẹ 2 km từ nhà tới chân đồi để khởi động.','Leo 3 km ở mức hơi khó — chỉ nói được vài từ. Về số nhẹ, đạp đều, ngồi yên trên yên.','Thả dốc xuống chậm, đạp nhẹ về nhà.'],loi:['Đạp số nặng ngay từ chân dốc rồi hết sức giữa đường.']},
+ xa7:{ten:'Vòng xà trên đỉnh đồi',loai:'tick',cach:['Mỗi vòng làm liền: kéo xà tối đa → dip tối đa → hít đất 10–15.','Nghỉ 2 phút giữa các vòng. Tích 1 ô sau mỗi vòng.'],loi:['Đung đưa người khi kéo xà.']},
+ pu:{ten:'Hít đất',loai:'lan',cach:['Tay đặt rộng hơn vai một chút, người thẳng từ đầu tới gót.','Hạ ngực xuống gần sàn, khuỷu tay chếch khoảng 45° so với thân.','Đẩy lên thẳng tay.'],loi:['Võng hông hoặc chổng mông.']},
+ tmi:{ten:'Máy 8% nhanh–chậm',loai:'tick',cach:['Khởi động 5 phút ở 4 km/h.','Mỗi vòng: đi nhanh 1 phút ở 6–6,5 km/h → đi chậm 2 phút ở 4 km/h.','Không vịn tay vào máy. Tích 1 ô sau mỗi vòng.'],loi:['Chạy thay vì đi nhanh.']},
+ iw20:{ten:'Đi dốc máy 8%',loai:'tick',cach:['Máy dốc cố định 8%, tốc độ 4,5–5 km/h.','Vẫn nói chuyện được là đúng mức. Không vịn tay vào máy.'],loi:[]},
+ hillcn:{ten:'Đạp xe ngắm cảnh',loai:'tick',cach:['Đạp thong thả buổi sáng, vừa đạp vừa nói chuyện được.','Đường đồi hoặc đường đẹp gần nhà, 45–60 phút.'],loi:[]},
+ hol:{ten:'Hollow body',loai:'giay',cach:['Nằm ngửa, ép lưng dưới sát sàn.','Nhấc nhẹ đầu, vai và 2 chân duỗi thẳng khỏi sàn, 2 tay duỗi dọc thân.','Giữ, thở đều. Dễ quá thì duỗi 2 tay qua đầu; khó quá thì co gối.'],loi:['Lưng dưới cong lên khỏi sàn.']},
+ llr:{ten:'Nâng chân nằm sàn',loai:'lan',cach:['Nằm ngửa, 2 bàn tay lót dưới mông.','Giữ 2 chân thẳng và khép, nâng lên tới khi chỉ thẳng lên trần.','Hạ thật chậm tới sát sàn (không chạm), lưng dưới luôn ép sàn.'],loi:['Thả chân rơi nhanh, lưng dưới cong lên.']},
+ ssq:{ten:'Split squat tạ tay',loai:'kg',cach:['Cầm 2 tạ, đứng chân trước chân sau cách nhau khoảng 1 bước dài, gót sau nhấc.','Hạ thẳng người xuống tới khi gối sau gần chạm sàn, đùi trước song song sàn.','Đạp chân trước đứng lên, chân không di chuyển. Làm hết 1 chân rồi đổi.'],loi:['Đổ người về trước, gối trước đổ vào trong.']},
+};
+const BUNG = [['dcr',3,'12'],['splk',3,'30s',1],['dbug',3,'10',1],['mcl',3,'30s']];
+export const SESS2 = {
+ TA:{ten:'Thân trên A',ngan:'Trên A',phu:'Ngực · vai · tay sau',ic:'dumb',phut:65,items:[['dbp',4,'6–10'],['pull',4,'tối đa'],['sp',3,'8–12'],['row1',3,'10–12',1],['idbp',3,'8–12'],['lat',3,'12–15'],['dip',3,'tối đa']]},
+ DOI3:{ten:'Đạp đồi + bụng',ngan:'Đồi',phu:'Leo đồi · bụng',ic:'bike',phut:80,items:[['hill',1,'2 km + leo 3 km'],...BUNG],
+  mua:[['tmi',8,"1' + 2'"],...BUNG]},
+ DA:{ten:'Thân dưới A',ngan:'Dưới A',phu:'Đùi trước · mông · bụng',ic:'dumb',phut:65,items:[['gsq',4,'8–12'],['rdl',4,'8–12'],['plank',3,'30–45s'],['bss',3,'8–10',1],['hol',3,'20–40s'],['ht',3,'10–12'],['calf',3,'12–15']]},
+ TB:{ten:'Thân trên B',ngan:'Trên B',phu:'Lưng · xô · tay trước',ic:'dumb',phut:65,items:[['chin',4,'tối đa'],['dbp',3,'10–12'],['csrow',4,'8–12'],['arn',3,'10–12'],['curl',3,'10–12'],['fp',3,'15'],['ohe',3,'10–12']]},
+ DB:{ten:'Thân dưới B',ngan:'Dưới B',phu:'Đùi sau · mông · bụng',ic:'dumb',phut:65,items:[['rdl',4,'6–10'],['lunge',3,'10',1],['rev',3,'15'],['gsqt',3,'10–12'],['slb',3,'12',1],['llr',3,'10–15'],['ssq',3,'10',1]]},
+ DOI7:{ten:'Đạp đồi + xà đỉnh đồi',ngan:'Đồi',phu:'Leo đồi · kéo xà · dip · hít đất',ic:'bike',phut:80,items:[['hill',1,'2 km + leo 3 km'],['xa7',3,'vòng']],
+  mua:[['circ',4,'vòng'],['iw20',1,'20 phút']]},
+ NN:{ten:'Đạp xe ngắm cảnh',ngan:'Ngắm cảnh',phu:'Đạp thong thả · giãn cơ',ic:'leaf',phut:75,buoi:'Sáng',items:[['hillcn',1,'45–60 phút'],['strc',1,'15 phút']],
+  mua:[['iw20',1,'30 phút'],['strc',1,'15 phút']]},
+};
+export const BYDOW2 = ['NN','TA','DOI3','DA','TB','DB','DOI7'];
+
+/* (v2.7.0) CLIP HƯỚNG DẪN quay thật: mã bài ⇒ tên clip ở Storage mwUsers/{uid}/tapclip/<tên>.mp4 (đẩy bằng tools/day-clip-tap.js).
+   Bài không có ở đây ⇒ vẽ người que cũ (hinh.js). */
+export const CLIP = Object.fromEntries('arn bss calf chin circ csrow curl dbp dbug dcr dip fp gsq gsqt hill hillcn hol ht idbp iw20 iw40 lat llr lunge mcl ohe plank pu pull rdl rev row1 slb sp splk ssq strc tmi'
+  .split(' ').map((k) => [k, k]).concat([['xa7', 'pu']]));

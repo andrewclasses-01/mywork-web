@@ -294,6 +294,7 @@ const tapRong = () => ({ san: false, hoso: null, ga: null, anh: [], ngay: {} });
 let tapDL = tapRong();
 const tapRef = (tl) => doc(db, 'mwUsers', UID, 'tap', tl);
 const tapOng = (p) => `https://firebasestorage.googleapis.com/v0/b/${TAP_BUCKET}/o/${encodeURIComponent(p)}`;
+const CLIP_V = 'v1', clipUrl = new Map();      // (v2.7.0) clip hướng dẫn: phiên bản bộ clip · blob URL đã mở trong phiên
 const tap = {
   // cb(dl, doi: Set ngày / '#hoso' / '#anh' vừa đổi trên kho) — lần đầu khi nạp xong, sau đó mỗi lần kho đổi (cả tiếng vọng của chính mình)
   nghe(cb) {
@@ -324,7 +325,26 @@ const tap = {
     return { p, url: tapOng(p) + '?alt=media&token=' + String(j.downloadTokens || '').split(',')[0] };
   },
   async xoaAnh(p) { const tk = await auth.currentUser.getIdToken(); await fetch(tapOng(p), { method: 'DELETE', headers: { Authorization: 'Firebase ' + tk } }); },
-  dong() { if (tapHuy) { tapHuy(); tapHuy = null; } tapCb = null; tapDL = tapRong(); },
+  /* (v2.7.0) CLIP HƯỚNG DẪN: Storage mwUsers/{uid}/tapclip/<tên>.mp4 — luật CHỈ chủ + claim thay đọc, KHÔNG có mã tải công khai
+     ⇒ tải bằng vé đăng nhập, cất Cache Storage `mywork-tapclip` (riêng từng máy ⇒ lần sau xem cả khi mất mạng).
+     Đổi clip trên Storage ⇒ tăng CLIP_V để máy tải lại. Trả về blob URL (giữ suốt phiên). */
+  async clip(ten) {
+    if (clipUrl.has(ten)) return clipUrl.get(ten);
+    const khoa = new URL(`/__tapclip/${CLIP_V}/${ten}.mp4`, location.href).href, coMay = typeof caches !== 'undefined';
+    let r = coMay ? await caches.open('mywork-tapclip').then((c) => c.match(khoa)).catch(() => null) : null;
+    if (!r) {
+      const tk = await auth.currentUser.getIdToken();
+      const x = await fetch(tapOng(`mwUsers/${UID}/tapclip/${ten}.mp4`) + '?alt=media', { headers: { Authorization: 'Firebase ' + tk } });
+      if (!x.ok) throw new Error('clip-' + x.status);
+      const b = await x.blob();
+      if (coMay) caches.open('mywork-tapclip').then((c) => c.put(khoa, new Response(b, { headers: { 'Content-Type': 'video/mp4' } }))).catch(() => {});
+      r = new Response(b);
+    }
+    const u = URL.createObjectURL(await r.blob());
+    clipUrl.set(ten, u);
+    return u;
+  },
+  dong() { if (tapHuy) { tapHuy(); tapHuy = null; } tapCb = null; tapDL = tapRong(); clipUrl.forEach((u) => URL.revokeObjectURL(u)); clipUrl.clear(); },
 };
 
 // ───────── (v2.5.0) myMUSIC: mwUsers/{uid}/nhac/ds — `bai` · `ds` (chuỗi JSON: danh sách bài · danh sách phát);

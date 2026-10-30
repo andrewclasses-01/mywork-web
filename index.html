@@ -1616,7 +1616,7 @@ const IC_NHAC='<svg class="i" viewBox="0 0 24 24"><path d="M9 18V5l12-2v13"/><ci
 /* nối module Tập luyện với kho (sau đăng nhập) */
 function noiTap(){
   const go=()=>{window.TAP.tapNoi({ghiNgay:window.KHO.tap.ghiNgay,ghiHoso:window.KHO.tap.ghiHoso,ghiAnh:window.KHO.tap.ghiAnh,
-      taiAnh:window.KHO.tap.taiAnh,xoaAnh:window.KHO.tap.xoaAnh,toast:m=>toast(m),khiDoi:()=>renderSide()});
+      taiAnh:window.KHO.tap.taiAnh,xoaAnh:window.KHO.tap.xoaAnh,clip:window.KHO.tap.clip,toast:m=>toast(m),khiDoi:()=>renderSide()});
     window.KHO.tap.nghe((dl,doi)=>{window.TAP.tapNap(dl,doi);if(!S.loggedOut)renderSide();});};
   if(window.TAP)go();else addEventListener('tap-ready',go,{once:true});
 }

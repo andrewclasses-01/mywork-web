@@ -1,17 +1,17 @@
 /* ============================================================
-   web/tap/tap.js — mục TẬP LUYỆN của myWork (v2.4.0, 26/10/2026)
+   web/tap/tap.js — mục TẬP LUYỆN của myWork (v2.4.0, 26/10/2026 · v2.7.0 Giáo án v2 + clip hướng dẫn, 30/10)
    Giao diện từ mẫu thiet-ke/mau-tap-v4 (thầy "ok build" 26/10). Dữ liệu THẬT: web/js/kho.js → KHO.tap
    (mwUsers/{uid}/tap: hoso · n_<YYYY-MM> · anh). Giáo án mặc định: ./giao-an.js (chỉ để tạo hồ sơ lần đầu).
 
    Dùng (index.html):
-     tapNoi(api)          — 1 lần sau đăng nhập. api = { ghiNgay, ghiHoso, ghiAnh, taiAnh, xoaAnh, toast }
+     tapNoi(api)          — 1 lần sau đăng nhập. api = { ghiNgay, ghiHoso, ghiAnh, taiAnh, xoaAnh, toast, clip(tên) ⇒ Promise<url> }
      tapNap(dl, doi)      — mỗi lần kho đổi (KHO.tap.nghe)
      tapGan(host, {dev})  — vẽ mục vào host; trả { host, huy() }
      tapConLai()          — số mục hôm nay chưa xong (cột trái)
      tapDong()            — đăng xuất
-   NHẬT KÝ 1 NGÀY: { sang:0|1, b:{ <mã bài>: [[kg, lần, xong], …] }, calo, buoc, can, vb, cg(1–5), gc }
+   NHẬT KÝ 1 NGÀY: { sang:0|1, sx:1 (sáng đạp xe), mua:1 (trời mưa ⇒ bài `mua`), b:{ <mã bài>: [[kg, lần, xong], …] }, calo, buoc, can, vb, cg(1–5), gc }
    ============================================================ */
-import { LIB as LIB0, SESS as SESS0, BYDOW as BY0 } from './giao-an.js';
+import { LIB as LIB0, SESS as SESS0, BYDOW as BY0, LIB2, SESS2, BYDOW2, CLIP } from './giao-an.js';
 import { chayHinh } from './hinh.js';
 
 /* ───────── ngày tháng ───────── */
@@ -46,6 +46,8 @@ const P = {
   smile: '<circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2M9 9h.01M15 9h.01"/>',
   note: '<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/>',
   cam: '<path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3z"/><circle cx="12" cy="13" r="3"/>',
+  bike: '<circle cx="5.5" cy="17.5" r="3.5"/><circle cx="18.5" cy="17.5" r="3.5"/><path d="M15 6a1 1 0 1 0 0-2 1 1 0 0 0 0 2zM12 17.5V14l-3-3 4-3 2 3h2"/>',
+  rain: '<path d="M20 16.6A5 5 0 0 0 18 7h-1.3A8 8 0 1 0 4 15.3"/><path d="M8 19v2M8 13v2M16 19v2M16 13v2M12 21v2M12 15v2"/>',
 };
 const ic = (n, st = '') => `<svg class="i" viewBox="0 0 24 24"${st ? ` style="${st}"` : ''}>${P[n] || ''}</svg>`;
 
@@ -57,9 +59,11 @@ function hosoMau(t) {
       { ten: 'Chặng 3 · Lộ múi mờ', den: '2027-10-31', can: 58, vbGiam: 16 }] };
 }
 const gaMau = (t) => [{ tu: monOf(t), ten: 'Giáo án v1', LIB: LIB0, SESS: SESS0, BYDOW: BY0 }];
+/* (v2.7.0) Giáo án v2 — áp từ T2 2/11/2026: THÊM vào `ga` của hồ sơ (ngày cũ giữ giáo án cũ) */
+export const GA2 = { tu: '2026-11-02', ten: 'Giáo án v2', LIB: LIB2, SESS: SESS2, BYDOW: BYDOW2 };
 
 /* ───────── dữ liệu ───────── */
-let API = null, DL = null, H = null, taoHoso = false;
+let API = null, DL = null, H = null, taoHoso = false, themGa = false;
 const LOG = {};                // nhật ký đang dùng trên máy này (ngày -> đối tượng)
 const CHO = new Map();         // ngày đang chờ ghi (hẹn giờ) ⇒ kho gửi về bản cũ hơn thì KHÔNG đè
 const HS = () => (DL && DL.hoso) || hosoMau(today());
@@ -69,6 +73,8 @@ function gaOf(day) { const g = GAS(); let r = g[0]; g.forEach((x) => { if (x.tu 
 function libAll() { const o = {}; GAS().forEach((g) => Object.assign(o, g.LIB)); return o; }
 const sessKey = (day) => { const g = gaOf(day); return g.BYDOW[pd(day).getDay()]; };
 const sessOf = (day) => { const g = gaOf(day); return g.SESS[g.BYDOW[pd(day).getDay()]]; };
+/* (v2.7.0) bài của ngày: buổi có `mua` + thầy bật ☔ ⇒ bộ bài trời mưa */
+const itemsOf = (day) => { const s = sessOf(day); if (!s) return []; return s.mua && LOG[day] && LOG[day].mua ? s.mua : s.items; };
 const LB = (day, id) => gaOf(day).LIB[id] || libAll()[id] || { ten: id, loai: 'tick', cach: [], loi: [] };
 const dayIdx = (s) => Math.round((pd(s) - pd(START())) / 864e5);
 const weekNo = (s) => Math.floor(dayIdx(s) / 7) + 1;
@@ -78,7 +84,7 @@ function setsOf(it, day) { const L = LB(day, it[0]); return weekNo(day) <= 2 && 
 function exState(day, it) { const n = setsOf(it, day), a = (LOG[day] && LOG[day].b && LOG[day].b[it[0]]) || []; const d = a.filter((x) => x && x[2]).length; return { n, d, done: d >= n }; }
 function dayPct(day) {
   const s = sessOf(day), L = LOG[day]; if (!L || !s) return 0;
-  const tot = s.items.length + (hasMorning(day) ? 1 : 0), ok = s.items.filter((it) => exState(day, it).done).length + (hasMorning(day) && L.sang ? 1 : 0);
+  const its = itemsOf(day), tot = its.length + (hasMorning(day) ? 1 : 0), ok = its.filter((it) => exState(day, it).done).length + (hasMorning(day) && L.sang ? 1 : 0);
   return Math.round(100 * ok / tot);
 }
 function lastOf(id, day) { for (let d = add(day, -1); d >= START(); d = add(d, -1)) { const a = LOG[d] && LOG[d].b && LOG[d].b[id]; if (a && a.some((x) => x && x[2])) return { day: d, a: a.filter((x) => x && x[2]) }; } return null; }
@@ -140,16 +146,21 @@ export function tapNap(dl, doi) {
     taoHoso = true;
     API.ghiHoso({ hoso: hosoMau(today()), ga: gaMau(today()) }).catch(() => { taoHoso = false; });
   }
+  /* (v2.7.0) hồ sơ cũ chưa có Giáo án v2 ⇒ thêm 1 lần (2 máy cùng thêm thì giống hệt nhau, không sao) */
+  if (dl.san && dl.hoso && dl.ga && dl.ga.length && !dl.ga.some((g) => g.tu === GA2.tu) && !themGa && API) {
+    themGa = true;
+    API.ghiHoso({ ga: dl.ga.concat([GA2]) }).catch(() => { themGa = false; });
+  }
   if (H) H.veTuXa(doi);
 }
 export function tapConLai() {
   if (!DL || !DL.san) return '';
   const t = today(); if (t < START()) return '';
   const s = sessOf(t); if (!s) return '';
-  const n = s.items.filter((it) => !exState(t, it).done).length + (hasMorning(t) && !(LOG[t] && LOG[t].sang) ? 1 : 0);
+  const n = itemsOf(t).filter((it) => !exState(t, it).done).length + (hasMorning(t) && !(LOG[t] && LOG[t].sang) ? 1 : 0);
   return n || '✓';
 }
-export function tapDong() { Object.keys(LOG).forEach((k) => delete LOG[k]); CHO.forEach((x) => clearTimeout(x)); CHO.clear(); DL = null; taoHoso = false; if (H) H.huy(); }
+export function tapDong() { Object.keys(LOG).forEach((k) => delete LOG[k]); CHO.forEach((x) => clearTimeout(x)); CHO.clear(); DL = null; taoHoso = false; themGa = false; if (H) H.huy(); }
 
 /* ───────── vẽ ───────── */
 const TABS = [['hom', 'Hôm nay', 'dumb'], ['tuan', 'Tuần', 'cal'], ['so', 'Số liệu', 'chart'], ['hs', 'Hồ sơ', 'user']];
@@ -202,6 +213,7 @@ export function tapGan(host, opt) {
   let cu = null;          /* { tab, ds: [chuỗi HTML từng khối con] } của lần vẽ trước */
   function body(anim) {
     const b = $('tB'), y = b.scrollTop, tmp = document.createElement('div');
+    requestAnimationFrame(() => b.querySelectorAll('details[data-how][open]').forEach(chayClip));
     tmp.innerHTML = { hom: homHtml, tuan: tuanHtml, so: soHtml, hs: hsHtml }[S.tab]();
     const moi = [...tmp.children], ds = moi.map((el) => el.outerHTML);
     if (!anim && cu && cu.tab === S.tab && cu.ds.length === ds.length && b.children.length === ds.length) {
@@ -225,14 +237,15 @@ export function tapGan(host, opt) {
     const day = S.day, mon = monOf(day), s = sessOf(day), L = lg(day), t = today();
     if (!s) return '<div class="t-empty">Chưa có giáo án cho ngày này</div>';
     const strip = [0, 1, 2, 3, 4, 5, 6].map((i) => { const d = add(mon, i), f = d > t; return `<button class="t-wd${d === day ? ' on' : ''}${f ? ' fut' : ''}" data-day="${d}">${WD[pd(d).getDay()]}<b>${dm(d)}</b>${ring(f ? 0 : dayPct(d))}</button>`; }).join('');
-    const done = s.items.filter((it) => exState(day, it).done).length + (hasMorning(day) && L.sang ? 1 : 0), tot = s.items.length + (hasMorning(day) ? 1 : 0);
+    const its = itemsOf(day), done = its.filter((it) => exState(day, it).done).length + (hasMorning(day) && L.sang ? 1 : 0), tot = its.length + (hasMorning(day) ? 1 : 0);
     const wn = weekNo(day);
     let h = `<div class="t-week">${strip}</div>
      <div class="t-sess"><span class="t-em">${ic(s.ic)}</span><div><h2>${esc(s.ten)}</h2><div class="t-s">${esc(s.phu)} · ${s.phut}'</div></div><div class="t-pr">${done}/${tot}</div></div>
+     ${s.mua ? `<button class="t-mua${L.mua ? ' on' : ''}" data-a="mua">${ic('rain')}<span>${L.mua ? 'Trời mưa · đang tập bài trong nhà' : 'Trời mưa? Đổi sang bài trong nhà'}</span></button>` : ''}
      ${wn >= 1 && wn <= 2 ? '<div class="t-tip">Tuần làm quen · bớt 1 hiệp, tạ nhẹ</div>' : ''}
      ${day > t ? '<div class="t-tip">Chưa tới ngày · chỉ xem</div>' : day < START() ? '<div class="t-tip">Trước ngày bắt đầu</div>' : ''}`;
     if (hasMorning(day)) h += `<div class="t-grp">Sáng</div>${sangRow(day)}`;
-    h += `<div class="t-grp">${sessKey(day) === 'NN' ? 'Tối' : 'Chiều'}</div>${s.items.map((it) => exRow(it, day)).join('')}`;
+    h += `<div class="t-grp">${s.buoi || (sessKey(day) === 'NN' ? 'Tối' : 'Chiều')}</div>${its.map((it) => exRow(it, day)).join('')}`;
     const isMon = pd(day).getDay() === 1, canDay = [1, 3, 5].includes(pd(day).getDay());
     const mrow = (f, icn, lab, unit, mode, due) => `<label class="t-mrow"><span class="t-mi">${ic(icn)}</span><span class="t-ml">${lab}${due ? '<i class="t-due" title="Hôm nay nên đo"></i>' : ''}</span>
       <input class="t-num" data-f="${f}" inputmode="${mode}" value="${+L[f] ? vn(L[f]) : ''}" placeholder="—"><span class="t-mu">${unit}</span></label>${hoiHtml(f)}`;
@@ -259,8 +272,11 @@ export function tapGan(host, opt) {
     return `<div class="t-hoi">${q.loi ? `<span>${esc(q.loi)}</span>` : `<span><b>${esc(q.hoi)}</b></span><button class="ok" data-hoiok="${f}">Đúng</button><button data-hoisua="${f}">Sửa</button>`}</div>`;
   }
   function sangRow(day) {
-    const on = !!lg(day).sang;
-    return `<div class="t-ex${on ? ' dn' : ''}"><div class="t-exh" data-sang><span class="t-ck${on ? ' on' : ''}"></span><div class="t-tt">Đi bộ ngoài trời</div><span class="t-tg">25' · đi nhanh</span></div></div>`;
+    const L = lg(day), on = !!L.sang, xe = !!L.sx, v2 = !!gaOf(day).SESS.DOI3;
+    if (!v2) return `<div class="t-ex${on ? ' dn' : ''}"><div class="t-exh" data-sang><span class="t-ck${on ? ' on' : ''}"></span><div class="t-tt">Đi bộ ngoài trời</div><span class="t-tg">25' · đi nhanh</span></div></div>`;
+    /* (v2.7.0) giáo án v2: chọn Đi bộ / Đạp xe rồi tích */
+    return `<div class="t-ex${on ? ' dn' : ''}"><div class="t-exh" data-sang><span class="t-ck${on ? ' on' : ''}"></span><div class="t-tt">${xe ? 'Đạp xe' : 'Đi bộ'} 25'</div>
+      <span class="t-seg2"><button data-sx="0" class="${xe ? '' : 'on'}">${ic('walk')}Đi bộ</button><button data-sx="1" class="${xe ? 'on' : ''}">${ic('bike')}Đạp xe</button></span></div></div>`;
   }
   function exRow(it, day) {
     const id = it[0], lb = LB(day, id), st = exState(day, it), open = S.open[day + id], a = lg(day).b[id] || [];
@@ -288,7 +304,7 @@ export function tapGan(host, opt) {
        ${sg || lastTxt ? `<div class="t-hint">${sg ? `<span class="t-sug${sg.up ? ' up' : ''}">${sg.up ? ic('up', 'width:13px;height:13px') : ''}<span>${sg.txt}</span></span>` : ''}${lastTxt ? `<span class="t-last" title="Lần trước">${lastTxt}</span>` : ''}</div>` : ''}
        ${sets}
        <details class="t-how" data-how="${day + id}"${S.how[day + id] ? ' open' : ''}><summary>${ic('book', 'width:14px;height:14px')} Cách tập</summary>
-        <div class="t-fig" data-fig="${id}"></div>
+        ${API && API.clip && CLIP[id] ? `<video class="t-clip" data-clip="${CLIP[id]}" muted loop playsinline preload="none"></video>` : `<div class="t-fig" data-fig="${id}"></div>`}
         <ol>${(lb.cach || []).map((x) => `<li>${esc(x)}</li>`).join('')}</ol>
         ${lb.de ? `<div style="margin-top:6px"><b>Bản dễ:</b> ${esc(lb.de)}</div>` : ''}
         ${lb.loi && lb.loi.length ? `<div class="t-bad"><b>Lỗi hay gặp:</b> ${esc(lb.loi.join(' '))}</div>` : ''}</details>
@@ -297,7 +313,7 @@ export function tapGan(host, opt) {
 
   /* ── TUẦN ── */
   const shade = (p) => p >= 90 ? ['var(--ac)', '#fff'] : p >= 60 ? ['#5fb3a6', '#fff'] : p >= 30 ? ['#b9e3da', '#0b4f46'] : p > 0 ? ['#e7f5f2', '#0b4f46'] : ['#f8e9e9', '#b45555'];
-  const shortName = (d) => { const s = sessOf(d); return s ? s.ten.replace('Thân trên', 'Trên').replace('Thân dưới', 'Dưới').replace('Cardio + bụng', 'Cardio').replace('Nghỉ chủ động', 'Nghỉ') : ''; };
+  const shortName = (d) => { const s = sessOf(d); return s && s.ngan ? s.ngan : s ? s.ten.replace('Thân trên', 'Trên').replace('Thân dưới', 'Dưới').replace('Cardio + bụng', 'Cardio').replace('Nghỉ chủ động', 'Nghỉ') : ''; };
   const legend = `<div class="t-lg"><i style="background:#f8e9e9"></i>0 <i style="background:#e7f5f2"></i>&lt;30 <i style="background:#b9e3da"></i>&lt;60 <i style="background:#5fb3a6"></i>&lt;90 <i style="background:var(--ac)"></i>≥90%</div>`;
   function tuan(w) {
     const mon = add(START(), (w - 1) * 7), t = today(); let calo = 0; const cans = [], ps = []; let vb = null;
@@ -426,7 +442,7 @@ export function tapGan(host, opt) {
     s += `Cân TB 7 ngày: ${ca.length ? ca[ca.length - 1].y : '—'} kg · Vòng bụng: ${vb.map((p) => dm(p.d) + ' ' + p.y).join(', ') || '—'}\n\n## Từng ngày\n`;
     Object.keys(LOG).sort().filter((d) => d >= START() && d <= t).forEach((d) => {
       const L = LOG[d], se = sessOf(d);
-      s += `- ${WD[pd(d).getDay()]} ${dm(d)} · ${se ? se.ten : '?'} · ${dayPct(d)}% · sáng ${L.sang ? '✓' : '✗'} · calo ${L.calo || '—'} · bước ${L.buoc || '—'}${L.can ? ' · cân ' + L.can : ''}${L.vb ? ' · bụng ' + L.vb : ''}${L.cg ? ' · cảm giác ' + L.cg + '/5' : ''}${L.gc ? ' · "' + L.gc + '"' : ''}\n`;
+      s += `- ${WD[pd(d).getDay()]} ${dm(d)} · ${se ? se.ten : '?'} · ${dayPct(d)}% · sáng ${L.sang ? '✓' + (L.sx ? ' (đạp xe)' : '') : '✗'}${L.mua ? ' · trời mưa' : ''} · calo ${L.calo || '—'} · bước ${L.buoc || '—'}${L.can ? ' · cân ' + L.can : ''}${L.vb ? ' · bụng ' + L.vb : ''}${L.cg ? ' · cảm giác ' + L.cg + '/5' : ''}${L.gc ? ' · "' + L.gc + '"' : ''}\n`;
       Object.keys(L.b || {}).forEach((id) => { const lb = all[id]; if (!lb || lb.loai === 'tick') return; const a = L.b[id].filter((x) => x && x[2]); if (a.length) s += `  - ${lb.ten}: ${a.map((x) => lb.loai === 'kg' && +x[0] ? x[0] + '×' + x[1] : x[1]).join(', ')}\n`; });
     });
     const xong = () => API.toast(`Đã chép báo cáo (${s.split('\n').length} dòng)`);
@@ -465,9 +481,10 @@ export function tapGan(host, opt) {
        <button class="add${S.dangTai ? ' busy' : ''}" data-a="anh" data-ngay="${today()}">${ic(S.dangTai ? 'cam' : 'plus')}${S.dangTai ? 'Đang gửi…' : dm(today())}</button></div></div>
     </div>
     <div class="t-card t-plan"><h3>${esc(gaOf(today()).ten)} <span class="t-s">từ ${dm(gaOf(today()).tu)}</span></h3>
-     ${['TA', 'DA', 'CD', 'TB', 'DB', 'TT', 'NN'].map((k, i) => { const g = gaOf(today()), s = g.SESS[k]; if (!s) return ''; return `<details><summary><b>${['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'][i]}</b>${esc(s.ten)}<span>${s.items.length} bài · ${s.phut}'</span></summary>
-      <ul>${s.items.map((it) => `<li>${esc((g.LIB[it[0]] || {}).ten || it[0])} <em>— ${it[1]} × ${esc(it[2])}${it[3] ? ' / bên' : ''}</em></li>`).join('')}</ul></details>`; }).join('')}
-     <div style="font-size:12.5px;color:var(--mu);margin-top:10px">Sáng T2–T7 đi bộ ngoài trời 25' · 10.000 bước/ngày</div></div>
+     ${[1, 2, 3, 4, 5, 6, 0].map((wd) => { const g = gaOf(today()), s = g.SESS[g.BYDOW[wd]]; if (!s) return ''; const li = (its) => its.map((it) => `<li>${esc((g.LIB[it[0]] || {}).ten || it[0])} <em>— ${it[1]} × ${esc(it[2])}${it[3] ? ' / bên' : ''}</em></li>`).join('');
+      return `<details><summary><b>${WD[wd]}</b>${esc(s.ten)}${s.buoi ? ` <em>(${esc(s.buoi.toLowerCase())})</em>` : ''}<span>${s.items.length} bài · ${s.phut}'</span></summary>
+      <ul>${li(s.items)}</ul>${s.mua ? `<div class="t-muad">${ic('rain', 'width:14px;height:14px')} Trời mưa</div><ul>${li(s.mua)}</ul>` : ''}</details>`; }).join('')}
+     <div style="font-size:12.5px;color:var(--mu);margin-top:10px">${gaOf(today()).SESS.DOI3 ? "Sáng T2–T7 đi bộ hoặc đạp xe 25' · máy chạy dốc cố định 8%" : "Sáng T2–T7 đi bộ ngoài trời 25'"} · 10.000 bước/ngày</div></div>
     ${S.big ? bigHtml() : ''}`;
   }
   function bigHtml() {
@@ -500,7 +517,7 @@ export function tapGan(host, opt) {
   /* (v2.6.1) BỎ pop-up đếm giờ nghỉ "Tiếp: hiệp x" (thầy không dùng — 28/10) */
 
   /* ── thao tác ── */
-  const itemOf = (day, id) => sessOf(day).items.find((x) => x[0] === id);
+  const itemOf = (day, id) => itemsOf(day).find((x) => x[0] === id);
   const doi = () => { luuNgay(S.day); if (API && API.khiDoi) API.khiDoi(); };
   function onClick(e) {
     const T = e.target;
@@ -526,6 +543,8 @@ export function tapGan(host, opt) {
     if (T.closest('[data-a="bigclose"]')) { S.big = null; S.xoaHoi = false; body(); return; }
     /* tích / nhập */
     const day = S.day, ro = khoa(day);
+    const sx = T.closest('[data-sx]'); if (sx) { if (ro) return; const L = lg(day); L.sx = +sx.dataset.sx; if (!L.sx) delete L.sx; doi(); body(); return; }
+    if (T.closest('[data-a="mua"]')) { if (ro) return API.toast('Chưa tới ngày'); const L = lg(day); if (L.mua) delete L.mua; else L.mua = 1; doi(); body(); return; }
     if (T.closest('[data-sang]')) { if (ro) return API.toast(day > today() ? 'Chưa tới ngày' : 'Trước ngày bắt đầu'); const L = lg(day); L.sang = L.sang ? 0 : 1; doi(); body(); return; }
     const cg = T.closest('[data-cg]'); if (cg) { if (ro) return; const L = lg(day), v = +cg.dataset.cg; L.cg = L.cg === v ? 0 : v; doi(); body(); return; }
     const stb = T.closest('[data-st]'); if (stb) {
@@ -550,7 +569,7 @@ export function tapGan(host, opt) {
       doi(); body();
       const ck = root.querySelector(`[data-sk="${id}|${i}"]`); if (ck) ck.classList.add('just');
       if (exState(day, it).done && x[2]) { const c2 = root.querySelector(`[data-ckall="${id}"]`); if (c2) c2.classList.add('just'); }
-      if (x[2] && day === today() && lb.loai !== 'tick' && !sessOf(day).items.some((y) => !exState(day, y).done)) API.toast('Xong buổi! 💪');
+      if (x[2] && day === today() && lb.loai !== 'tick' && !itemsOf(day).some((y) => !exState(day, y).done)) API.toast('Xong buổi! 💪');
       return;
     }
     const ca = T.closest('[data-ckall]'); if (ca) {
@@ -618,7 +637,16 @@ export function tapGan(host, opt) {
   function onInput(e) { const t = e.target; if (t.classList.contains('t-num')) t.value = t.value.replace(t.dataset.hs === 'cao' ? /[^0-9.,mM]/g : /[^0-9.,]/g, ''); }
   root.addEventListener('click', onClick); root.addEventListener('keydown', onKey); root.addEventListener('change', onChange); root.addEventListener('input', onInput);
   /* (v2.5.0) nhớ mục "Cách tập" đang mở (khung vẽ lại không đóng mất) + hình động chỉ chạy ở mục đang mở */
-  root.addEventListener('toggle', (e) => { const d = e.target; if (d.dataset && d.dataset.how) S.how[d.dataset.how] = d.open; }, true);
+  root.addEventListener('toggle', (e) => { const d = e.target; if (d.dataset && d.dataset.how) { S.how[d.dataset.how] = d.open; chayClip(d); } }, true);
+  /* (v2.7.0) clip hướng dẫn: gắn nguồn lúc mở lần đầu, đóng thì dừng */
+  function chayClip(d) {
+    const v = d.querySelector('video.t-clip'); if (!v) return;
+    if (!d.open) { v.pause(); return; }
+    if (v.src) { v.play().catch(() => {}); return; }
+    if (v.dataset.dang) return; v.dataset.dang = 1;
+    API.clip(v.dataset.clip).then((u) => { v.src = u; if (d.open) v.play().catch(() => {}); },
+      () => { v.removeAttribute('data-dang'); v.classList.add('loi'); });
+  }
   const dungHinh = chayHinh(root);
   const onRs = () => pill(); addEventListener('resize', onRs);
 

@@ -265,3 +265,15 @@
 .tp.ngoainav .t-pnav{display:none!important}
 .tp.phone.ngoainav .t-body{padding-bottom:40px}
 .t-ch .ax{font-weight:600}
+/* (v2.7.0) Giáo án v2: nút trời mưa · chọn đi bộ/đạp xe buổi sáng · clip hướng dẫn quay thật */
+.t-mua{display:flex;align-items:center;gap:8px;width:100%;margin:0 0 8px;padding:9px 14px;border-radius:12px;border:1px dashed var(--acm)!important;color:var(--mu);font-size:13px;font-weight:500;text-align:left}
+.t-mua svg.i{width:17px;height:17px}
+.t-mua.on{border-style:solid!important;background:#eef4ff;border-color:#bcd0f5!important;color:#2f5aa8;font-weight:600}
+.t-seg2{display:inline-flex;background:var(--t-soft2);border-radius:9px;padding:2px;margin-left:auto;flex:none}
+.t-seg2 button{display:inline-flex;align-items:center;gap:4px;padding:4px 9px;border-radius:7px;font-size:12.5px;font-weight:600;color:var(--mu)}
+.t-seg2 button svg.i{width:14px;height:14px}
+.t-seg2 button.on{background:var(--t-bg);color:var(--ac2);box-shadow:0 1px 3px #0001}
+.t-seg2+.t-tg{margin-left:6px}
+.t-clip{display:block;width:100%;max-width:420px;aspect-ratio:640/370;border-radius:12px;margin:8px 0 10px;background:#f4f8f1;border:1px solid var(--li);object-fit:cover}
+.t-muad{display:flex;align-items:center;gap:5px;margin:8px 0 2px;color:#2f5aa8;font-size:12.5px;font-weight:600}
+.t-clip.loi{display:none}

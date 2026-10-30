@@ -59,8 +59,8 @@ function hosoMau(t) {
       { ten: 'Chặng 3 · Lộ múi mờ', den: '2027-10-31', can: 58, vbGiam: 16 }] };
 }
 const gaMau = (t) => [{ tu: monOf(t), ten: 'Giáo án v1', LIB: LIB0, SESS: SESS0, BYDOW: BY0 }];
-/* (v2.7.0) Giáo án v2 — áp từ T2 2/11/2026: THÊM vào `ga` của hồ sơ (ngày cũ giữ giáo án cũ) */
-export const GA2 = { tu: '2026-11-02', ten: 'Giáo án v2', LIB: LIB2, SESS: SESS2, BYDOW: BYDOW2 };
+/* (v2.7.0) Giáo án v2 — (v2.7.1) áp từ T7 31/10/2026 (trước: T2 2/11): THÊM vào `ga` của hồ sơ (ngày cũ giữ giáo án cũ) */
+export const GA2 = { tu: '2026-10-31', ten: 'Giáo án v2', LIB: LIB2, SESS: SESS2, BYDOW: BYDOW2 };
 
 /* ───────── dữ liệu ───────── */
 let API = null, DL = null, H = null, taoHoso = false, themGa = false;
@@ -146,7 +146,8 @@ export function tapNap(dl, doi) {
     taoHoso = true;
     API.ghiHoso({ hoso: hosoMau(today()), ga: gaMau(today()) }).catch(() => { taoHoso = false; });
   }
-  /* (v2.7.0) hồ sơ cũ chưa có Giáo án v2 ⇒ thêm 1 lần (2 máy cùng thêm thì giống hệt nhau, không sao) */
+  /* (v2.7.0) hồ sơ cũ chưa có Giáo án v2 ⇒ thêm 1 lần (2 máy cùng thêm thì giống hệt nhau, không sao)
+     (v2.7.1) thầy đổi áp từ 31/10 ⇒ thêm bản tu 31/10; bản tu 2/11 cũ (nếu có) giữ nguyên — cùng nội dung, máy chạy code cũ không thêm lại */
   if (dl.san && dl.hoso && dl.ga && dl.ga.length && !dl.ga.some((g) => g.tu === GA2.tu) && !themGa && API) {
     themGa = true;
     API.ghiHoso({ ga: dl.ga.concat([GA2]) }).catch(() => { themGa = false; });

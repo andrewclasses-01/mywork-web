@@ -914,6 +914,56 @@ body{min-height:0}
 .sortable-ghost{opacity:.35}
 .frame.dragging,.frame.dragging *{cursor:grabbing!important}
 @media (prefers-reduced-motion: reduce){*,::view-transition-group(*),::view-transition-old(*),::view-transition-new(*){animation:none!important;transition:none!important}}
+
+/* ===================== v2.9.0 (mẫu v16, 31/10/2026) ===================== */
+/* thanh Thêm việc cao hơn; bấm vào: chữ "Thêm việc" ẩn, chỉ còn con trỏ */
+.qa{margin-bottom:30px}
+.phone .qa{margin-bottom:14px}
+.qa .in{padding:13px 14px}
+.qa input:focus::placeholder{color:transparent!important}
+/* máy tính: thanh nhạc GIỮA cột giữa */
+.frame.cophat .app:not(.phone) .ptop{justify-content:center}
+/* thư mục: icon 3 gạch kiểu To Do, màu của thư mục */
+.nav .lic{width:18px;height:18px;flex:none;display:grid;place-items:center;color:var(--lc)}
+.nav .lic svg.i{width:17px;height:17px;stroke-width:2;color:var(--lc)}
+/* ảnh thầy cạnh chữ myWork */
+.brand .lg.av{border-radius:50%;object-fit:cover;box-shadow:0 0 0 1.5px rgba(255,255,255,.14)}
+/* ngôi sao to hơn, bật = vàng sáng */
+.row .star{padding:5px;margin:-3px -4px -3px 0}
+.row .star svg.i{width:21px;height:21px;stroke-width:1.7}
+.star.on{color:#fbbf24!important}
+.star.on svg{fill:#fbbf24!important;filter:drop-shadow(0 0 6px rgba(251,191,36,.55))}
+.star:hover{color:#fbbf24}
+.star.on:active svg{transform:scale(1.25)}
+/* ô tích + chữ + sao cân giữa theo chiều cao ô */
+.row{align-items:center!important}
+.row .ck,.row .star,.row .due{margin-top:0!important}
+.hasbg .row{padding:14px 14px;min-height:56px}
+/* dòng nhỏ "x of y" khi có việc con */
+.tt .sub{display:flex;align-items:center;gap:5px;font-size:12px;color:#6b7280;margin-top:3px;line-height:1.2}
+.tt .sub::before{content:'';width:5px;height:5px;border-radius:50%;background:currentColor;opacity:.55}
+/* kéo-thả: dòng đang kéo nổi lên, chỗ thả mờ */
+.sortable-fallback{opacity:.96!important;transform:rotate(1deg);box-shadow:0 14px 34px rgba(0,0,0,.35)!important;border-radius:10px}
+.sortable-ghost{opacity:.35}
+.row.sortable-chosen,.nav.sortable-chosen{transition:none}
+/* ---------- DARK: dịu hơn, cột trái = cột chi tiết (cùng nền, cùng viền tối — hết nét trắng) ---------- */
+.dk .side,.dk .detail,.dk #detail2{background:#25282c}
+.dk .side{border-right-color:#33363b}
+.dk .detail,.dk #detail2{border-left:1px solid #33363b}
+.dk .app{background:#25282c}
+.dk .hasbg .row{background:rgba(44,47,52,.80);box-shadow:0 1px 0 rgba(255,255,255,.04) inset,0 4px 14px rgba(0,0,0,.18)}
+.dk .hasbg .row:hover{background:rgba(54,58,63,.88)}
+.dk .hasbg .row.sel{background:rgba(26,64,58,.90);box-shadow:0 0 0 1px rgba(45,212,191,.28) inset,0 4px 14px rgba(0,0,0,.22)}
+.dk .tt b{color:#eef0f2}
+.dk .tt .sub{color:#9aa1a9}
+.dk .row .ck{border-color:#8b9198}
+.dk .row .ck:hover{border-color:#cfd3d7;background:rgba(255,255,255,.06)}
+.dk .star{color:#7d838a}
+.dk .star.on{color:#fcd34d!important}.dk .star.on svg{fill:#fcd34d!important;filter:drop-shadow(0 0 7px rgba(252,211,77,.6))}
+.dk .hasbg .qa{background:rgba(44,47,52,.84);box-shadow:0 1px 0 rgba(255,255,255,.05) inset,0 6px 20px rgba(0,0,0,.25)}
+.dk .hasbg .qa:focus-within{background:rgba(36,39,43,.96);box-shadow:0 0 0 1.5px var(--ac),0 6px 20px rgba(0,0,0,.3)}
+.dk .qa input::placeholder{color:#c3c8cd}
+.dk .hasbg .grp{background:rgba(44,47,52,.82);color:#d5d8dc}
 </style>
 </head>
 <body>
@@ -939,8 +989,9 @@ function dragScroll(on,fromEl){
   DS.raf=requestAnimationFrame(tick);}
 if(window.Sortable){const _mk=Sortable.create.bind(Sortable);
   Sortable.create=(el,o={})=>{const st=o.onStart,en=o.onEnd,fr=()=>document.getElementById('frame');
-    /* (v2.5.0) thầy chốt: GIỮ ~0,25 s mới kéo được (chuột lẫn cảm ứng) — bấm nhanh chỉ mở/chọn; nhích tay trước khi đủ giờ = huỷ kéo */
-    return _mk(el,Object.assign({forceFallback:true,fallbackTolerance:4,scroll:false},o,{delay:250,delayOnTouchOnly:false,touchStartThreshold:6,
+    /* (v2.9.0) thầy: giữ-mới-kéo bằng chuột "di mãi không được" (nhích trước 0,25 s là bị huỷ lặng lẽ) ⇒ CHUỘT kéo liền (nhích 5px; bấm thường vẫn là chọn),
+       CẢM ỨNG giữ 0,3 s (khỏi lẫn vuốt cuộn), rung tay ≤ 12px không huỷ */
+    return _mk(el,Object.assign({forceFallback:true,fallbackTolerance:4,scroll:false},o,{delay:300,delayOnTouchOnly:true,touchStartThreshold:12,fallbackTolerance:5,
       onStart(e){fr()&&fr().classList.add('dragging');DS.y=(e.originalEvent&&e.originalEvent.clientY)||0;dragScroll(true,e.from);st&&st.call(this,e);},
       onEnd(e){dragScroll(false);fr()&&fr().classList.remove('dragging');en&&en.call(this,e);}}));};}
 /* ================== biểu tượng ================== */
@@ -962,6 +1013,7 @@ list:'<path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/>',
 done:'<circle cx="12" cy="12" r="9"/><path d="m8 12 3 3 5-6"/>',
 all:'<rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/>',
 menu:'<path d="M3 6h18M3 12h18M3 18h18"/>',
+home:'<path d="M3 10.5 12 3l9 7.5"/><path d="M5 9v11a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1V9"/>',
 search:'<circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/>',
 plus:'<path d="M12 5v14M5 12h14"/>',
 bell:'<path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.9 1.9 0 0 0 3.4 0"/>',
@@ -1124,15 +1176,15 @@ function cnt(p){return DB.tasks.filter(t=>!t.done&&p(t)).length;}
 function renderSide(){
   const n=(k,icn,label,c)=>`<button class="nav${S.nav===k?' on':''}" data-nav="${k}">${ic(icn)}<span class="nl">${label}</span><span class="n">${c??(cnt(scope(k).pred)||'')}</span></button>`;
   const sm=S.set.smart;
-  $('sideIn').innerHTML=`<div class="brand"><img class="lg" src="logo.svg" alt=""> myWork
+  $('sideIn').innerHTML=`<div class="brand"><img class="lg av" src="anh-thay.webp" alt=""> myWork
      <button class="ib" style="margin-left:auto" data-a="cmdk" title="Tìm kiếm (Ctrl K)">${ic('search','width:17px;height:17px')}</button></div>
-   ${S.role==='thay'?`<button class="nav${S.nav==='mylink'?' on':''}" data-nav="mylink">${IC_ML}<span class="nl">myLink</span><span class="n">${mlToday()}</span></button>
+   ${S.role==='thay'?`<button class="nav${S.nav==='mylink'?' on':''}" data-nav="mylink">${IC_ML}<span class="nl">Link</span><span class="n">${mlToday()}</span></button>
      <button class="nav${S.nav==='tap'?' on':''}" data-nav="tap">${IC_TAP}<span class="nl">Tập luyện</span><span class="n">${window.TAP?window.TAP.tapConLai():''}</span></button>
-     <button class="nav${S.nav==='nhac'?' on':''}" data-nav="nhac">${IC_NHAC}<span class="nl">myMusic</span><span class="n"></span></button><div class="sep"></div>`:''}
-   ${n('myday','sun','Ngày của tôi')}${sm.important?n('important','star','Quan trọng'):''}${sm.planned?n('planned','cal','Có hạn'):''}
-   ${sm.inbox?n('l:inbox','inbox','Việc',cnt(t=>t.list==='inbox')||''):''}
+     <button class="nav${S.nav==='nhac'?' on':''}" data-nav="nhac">${IC_NHAC}<span class="nl">Âm nhạc</span><span class="n"></span></button><div class="sep"></div>`:''}
+   ${n('myday','sun','Ngày của tôi')}${sm.important?n('important','star','Quan trọng'):''}
+   ${sm.inbox?n('l:inbox','home','Việc',cnt(t=>t.list==='inbox')||''):''}
    <div class="sep"></div>
-   <div id="lsts">${DB.lists.filter(l=>!l.fixed).map(l=>`<button class="nav${S.nav==='l:'+l.id?' on':''}" data-nav="l:${l.id}" data-lid="${l.id}"><span class="dot" style="background:${l.color}"></span><span class="nl">${esc(l.name)}</span><span class="n">${cnt(t=>t.list===l.id)||''}</span></button>`).join('')}</div>
+   <div id="lsts">${DB.lists.filter(l=>!l.fixed).map(l=>`<button class="nav${S.nav==='l:'+l.id?' on':''}" data-nav="l:${l.id}" data-lid="${l.id}"><span class="lic" style="--lc:${l.color}">${ic('menu')}</span><span class="nl">${esc(l.name)}</span><span class="n">${cnt(t=>t.list===l.id)||''}</span></button>`).join('')}</div>
    <button class="newl" data-a="newlist">${ic('plus')} Danh sách mới</button>
    <div class="sep"></div>
    <div class="cap click${S.vOpen?'':' shut'}" data-a="vfold"><span class="car">▾</span> Chế độ xem</div>
@@ -1175,7 +1227,7 @@ function metaHtml(t,showList){
 function rowHtml(t,showList){
   return `<div class="row${t.done?' done':''}${S.sel===t.id?' sel':''}" data-t="${t.id}" style="--lc:${L(t.list).color}">
     <span class="ck${t.done?' on':''}" data-ck="${t.id}"></span>
-    <div class="tt"><b>${esc(t.title)}</b>${S.dense==='full'?`<div class="meta">${metaHtml(t,showList)}</div>`:''}</div>
+    <div class="tt"><b>${esc(t.title)}</b>${t.steps.length&&S.dense!=='full'?`<small class="sub">${t.steps.filter(x=>x.d).length} of ${t.steps.length}</small>`:''}${S.dense==='full'?`<div class="meta">${metaHtml(t,showList)}</div>`:''}</div>
     ${S.dense!=='full'&&t.due&&!t.done?`<span class="due ${dueCls(t)}">${dueShort(t)}</span>`:''}
     <button class="star${t.star?' on':''}" data-star="${t.id}">${ic('star')}</button></div>`;
 }
@@ -1578,7 +1630,7 @@ function showMyLink(on){
   const h=$('mlHost');if(!h)return;
   h.hidden=!on;$('mbody').hidden=on;
   if(!on)return;
-  $('mhead').innerHTML=`<div class="head mlhead"><div class="h1row"><h1>myLink</h1>
+  $('mhead').innerHTML=`<div class="head mlhead"><div class="h1row"><h1>Link</h1>
     <div class="r"><button class="ib" data-a="mlref" title="Tải lại">${ic('repeat')}</button><button class="ib" data-a="mlset" title="Cài đặt lớp & lịch của myLink">${ic('sliders')}</button></div></div></div>`;
   if(!window.initMyLink){window.addEventListener('ml-ready',()=>showMyLink(S.nav==='mylink'),{once:true});return;}
   if(S.mlH)S.mlH.destroy();
@@ -1646,7 +1698,7 @@ function ckSearch(){
   if(tasks.length)R.push([q?'Việc':'Việc hôm nay',tasks.map(t=>({v:'t:'+t.id,h:`<span class="ck mini${t.done?' on':''}" style="--lc:${L(t.list).color}"></span><span class="tx${t.done?' dn':''}">${mk(t.title)}</span><span class="r">${esc(L(t.list).name)}</span>`}))]);
   const ls=DB.lists.filter(l=>hit(l.name));if(q&&ls.length)R.push(['Danh sách',ls.map(l=>({v:'n:l:'+l.id,h:`<span class="ldot" style="background:${l.color}"></span>${mk(l.name)}`}))]);
   const tp=DB.tpls.filter(x=>hit(x.name)||(q&&'mẫu'.includes(q)));if(tp.length)R.push(['Tạo việc từ mẫu',tp.map(x=>({v:'p:'+x.id,h:`${ic('note')} ${mk(x.name)}<span class="r">${x.steps.length} bước</span>`}))]);
-  const go=[['n:myday','sun','Ngày của tôi'],['n:important','star','Quan trọng'],['n:planned','cal','Có hạn'],...(S.role==='thay'?[['n:mylink','link','myLink'],['n:tap','repeat','Tập luyện'],['n:nhac','repeat','myMusic']]:[]),['s:settings','sliders','Cài đặt'],['s:theme','sun','Đổi Sáng / Tối']].filter(x=>hit(x[2]));
+  const go=[['n:myday','sun','Ngày của tôi'],['n:important','star','Quan trọng'],...(S.role==='thay'?[['n:mylink','link','Link'],['n:tap','repeat','Tập luyện'],['n:nhac','repeat','Âm nhạc']]:[]),['s:settings','sliders','Cài đặt'],['s:theme','sun','Đổi Sáng / Tối']].filter(x=>hit(x[2]));
   if(go.length)R.push(['Đi tới',go.map(x=>({v:x[0],h:`${ic(x[1])} ${mk(x[2])}`}))]);
   $('ckRes').innerHTML=R.length?R.map(([lab,its])=>`<div class="lab">${lab}</div>`+its.map(x=>`<button class="it" data-ck2="${x.v}">${x.h}</button>`).join('')).join(''):`<div class="empty" style="padding:34px 10px">Không thấy "${esc(q)}"</div>`;
   const f=$('ckRes').querySelector('.it');if(f)f.classList.add('hi');
@@ -1766,9 +1818,8 @@ function focusQa(){if(S.view==='board')return openKadd('todo');if(S.view==='cal'
 function renderQa(){
   const sc=scope(S.nav);
   $('qa').classList.toggle('on',S.qa);
-  $('qa').innerHTML=`<div class="in"><span class="plus">${ic('plus')}</span><input id="qaIn" placeholder="Thêm việc" autocomplete="off">
-    <button class="ib qtpl" data-a="tpl" title="Tạo việc từ mẫu">${ic('note','width:16px;height:16px')}</button></div>
-    <div class="prev" id="qaPrev"></div><div class="hint">Mẹo: gõ "mai 17h", "t6", "#thẻ", "!" để đặt hạn, thẻ, quan trọng</div>`;
+  $('qa').innerHTML=`<div class="in"><span class="plus">${ic('plus')}</span><input id="qaIn" placeholder="Thêm việc" autocomplete="off"></div>
+    <div class="prev" id="qaPrev"></div>`;
   const inp=$('qaIn');
   inp.oninput=()=>prevQa();
   inp.onkeydown=e=>{if(e.key==='Enter'&&inp.value.trim()){addQA(inp.value);inp.value='';prevQa();}if(e.key==='Escape'){inp.blur();S.qa=false;$('qa').classList.remove('on');}};
@@ -2085,10 +2136,10 @@ function completeTask(t){
   const row=frame.querySelector(`#mbody [data-t="${t.id}"]`),becoming=!t.done;
   toggleDone(t);
   if(!row||!becoming||noMotion())return rerender();
-  const ck=row.querySelector('.ck');if(ck){ck.classList.add('on','pop');}row.classList.add('done');
-  renderDetail();
-  setTimeout(()=>{const dnOpen=S.shut[S.nav+'dn']===false||S.view==='board';
-    if(dnOpen)rerender();else collapse(row,rerender);},300);
+  /* (v2.9.0) thầy: ẩn NGAY, nhanh, không lỗi ⇒ mờ 120ms rồi vẽ lại không trượt (bỏ nảy + thu gọn 300+240ms) */
+  const ck=row.querySelector('.ck');if(ck)ck.classList.add('on');row.classList.add('done');
+  const het=()=>{S.noFlip=true;try{rerender();}finally{S.noFlip=false;}};
+  onDone(row.animate([{opacity:1},{opacity:0}],{duration:120,easing:'ease-out',fill:'forwards'}),120,het);
 }
 function popEl(sel){const el=frame.querySelector(sel);if(el&&!noMotion())el.animate([{transform:'scale(.6)'},{transform:'scale(1.25)'},{transform:'none'}],{duration:380,easing:EASE});}
 /* hộp Cài đặt / Tìm kiếm PHÓNG RA từ chỗ vừa bấm, đóng thì THU VỀ chỗ đó */

@@ -277,3 +277,71 @@
 .t-clip{display:block;width:100%;max-width:420px;aspect-ratio:640/370;border-radius:12px;margin:8px 0 10px;background:#f4f8f1;border:1px solid var(--li);object-fit:cover}
 .t-muad{display:flex;align-items:center;gap:5px;margin:8px 0 2px;color:#2f5aa8;font-size:12.5px;font-weight:600}
 .t-clip.loi{display:none}
+
+/* ================= (v2.8.0) mẫu v7: ô tích nhỏ · nút ⓘ · lưới hiệp gọn · vuốt xoá ================= */
+.dk .tp{--acm:#2b5d55}
+.tp .t-ck{width:20px;height:20px;border-width:1.8px}
+.tp .t-ck.on::after{width:8px;height:4px}
+.tp.phone .t-exh{padding:12px 6px;gap:11px}
+.t-exh .t-tt{display:flex;align-items:center;gap:6px}
+.t-info{display:none;width:24px;height:24px;border-radius:50%;place-items:center;color:var(--mu);flex:none;margin:-4px 0}
+.t-ex.op .t-info{display:grid}
+.t-info svg.i{width:17px!important;height:17px!important}
+.t-info:hover{color:var(--ac2)}
+.t-info.on{color:var(--ac2);background:var(--acl)}
+.tp .t-ex .t-exin{padding:0 12px 12px 43px}
+.tp.phone .t-ex .t-exin{padding:0 6px 12px 37px}
+.t-how{display:grid;grid-template-rows:0fr;transition:grid-template-rows .22s var(--ease);font-size:13px;line-height:1.55}
+.t-how.on{grid-template-rows:1fr}
+.t-how>div{overflow:hidden}
+.t-howin{padding:0 0 12px}
+.t-how ol{margin:6px 0 0 18px}
+.t-hint{margin-bottom:8px}
+/* lưới hiệp: số · ô số · ô tích vuông */
+.tp .t-sets{display:flex;flex-direction:column;gap:3px;margin:0}
+.tp .t-sets .t-shd{display:grid;gap:8px;padding:0 4px 2px;font-size:11px;font-weight:600;color:var(--mu);text-align:center;margin:0}
+.tp .t-sets.k2 .t-shd,.tp .t-sets.k2 .t-sw{grid-template-columns:18px 112px 112px 1fr 20px}
+.tp .t-sets.k1 .t-shd,.tp .t-sets.k1 .t-sw{grid-template-columns:18px 112px 1fr 20px}
+.tp .t-sets .t-set{display:block;position:relative;border-radius:9px;overflow:hidden}
+.t-sw{display:grid;gap:8px;align-items:center;padding:3px 4px;position:relative;z-index:1;background:var(--t-soft);border-radius:9px;transition:transform .2s var(--ease);touch-action:pan-y}
+.t-sw.keo{transition:none}
+.tp .t-del{position:absolute;right:0;top:0;bottom:0;width:76px;background:#e5484d;color:#fff;font-weight:700;font-size:13px;border-radius:9px}
+.tp .t-sets .t-no{width:auto;font-size:12px;font-weight:600;color:var(--mu);text-align:center;font-variant-numeric:tabular-nums}
+.t-lb{font-size:13.5px;color:var(--tx);font-weight:500}
+.t-set.dn .t-lb{color:var(--mu)}
+.tp .t-sets .t-stp{display:inline-flex;align-items:center;height:32px;width:112px;border:1px solid var(--t-in);border-radius:9px;background:var(--t-bg);overflow:hidden}
+.tp .t-sets .t-stp:focus-within{border-color:var(--ac)}
+.tp .t-sets .t-stp button{display:grid;place-items:center;width:30px;height:100%;font-size:17px;font-weight:500;color:var(--mu);flex:none}
+.tp .t-sets .t-stp button:hover{color:var(--ac2);background:var(--t-soft2)}
+.tp .t-sets .t-stp .t-num{flex:1;min-width:0;width:auto;height:100%;border:0;border-radius:0;padding:0;background:transparent;box-shadow:none;text-align:center;font-size:15px;font-weight:600}
+.tp .t-sets .t-set.dn .t-stp{background:var(--t-soft2);border-color:var(--t-in)}
+.tp .t-sets .t-set.dn .t-num{color:var(--mu)}
+.t-sq{width:20px;height:20px;border-radius:6px;border:1.6px solid #94a3b8;display:grid;place-items:center;cursor:pointer;justify-self:end;position:relative;transition:background .15s,border-color .15s}
+.t-sq::before{content:'';position:absolute;inset:-10px}
+.t-sq:hover{border-color:var(--ac)}
+.t-sq.on{background:var(--ac);border-color:var(--ac)}
+.t-sq.on::after{content:'';width:8px;height:4px;border-left:2px solid #fff;border-bottom:2px solid #fff;transform:rotate(-45deg) translate(1px,-1px)}
+.t-sq.just.on::after{animation:t-pop .25s var(--ease)}
+.tp .t-sets .t-addset{width:26px;height:26px;margin:2px 0 0;padding:0;border-radius:50%;display:grid;place-items:center;color:var(--ac2)}
+.tp .t-sets .t-addset svg.i{width:16px;height:16px;stroke-width:2.2}
+.tp .t-sets .t-addset:hover{background:var(--acl)}
+.t-menu{position:absolute;z-index:40;display:none;min-width:150px;background:var(--t-bg);border:1px solid var(--li);border-radius:10px;box-shadow:0 12px 30px rgba(0,0,0,.25);padding:4px}
+.t-menu.on{display:block;animation:t-sl .14s var(--ease)}
+.tp .t-menu button{display:flex;align-items:center;gap:8px;width:100%;padding:8px 10px;border-radius:7px;color:#e5484d;font-size:13.5px;font-weight:600}
+.tp .t-menu button:hover{background:var(--t-soft2)}
+.t-menu svg.i{width:16px;height:16px}
+/* (v2.8.0 · 31/10 lần 2) CÂN GIỮA tuyệt đối phần mở rộng: hướng dẫn, gợi ý, lưới hiệp (cả ô tích) — lề trái = lề phải */
+.tp .t-ex .t-exin,.tp.phone .t-ex .t-exin{padding:2px 12px 14px}
+.t-howin{display:flex;flex-direction:column;align-items:center}
+.t-howin .t-clip,.t-howin .t-fig{margin:4px auto 10px;width:100%}
+.t-howin ol,.t-howin>div{width:100%;max-width:420px}
+.t-hint{justify-content:center}
+.tp .t-sets{width:max-content;max-width:100%;margin:0 auto}
+.tp .t-sets.k2 .t-shd,.tp .t-sets.k2 .t-sw{grid-template-columns:18px 112px 112px 20px;gap:10px}
+.tp .t-sets.k1 .t-shd,.tp .t-sets.k1 .t-sw{grid-template-columns:18px 112px 20px;gap:10px}
+.tp .t-sets .t-sq{justify-self:center}
+/* nút Xoá chỉ lộ khi đang vuốt / đã vuốt (không ló viền đỏ ở góc bo) */
+.tp .t-del{visibility:hidden}
+.t-set.kv .t-del,.t-set.sw .t-del{visibility:visible}
+.t-lb{text-align:center}
+.t-howin ol{margin:6px 0 0;padding-left:20px;box-sizing:border-box}

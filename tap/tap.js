@@ -1,5 +1,5 @@
 /* ============================================================
-   web/tap/tap.js — mục TẬP LUYỆN của myWork (v2.4.0, 26/10/2026 · v2.7.0 Giáo án v2 + clip hướng dẫn, 30/10)
+   web/tap/tap.js — mục TẬP LUYỆN của myWork (v2.4.0, 26/10/2026 · v2.7.0 Giáo án v2 + clip hướng dẫn, 30/10 · v2.8.0 mẫu v7: nút ⓘ, lưới hiệp gọn, thêm/xoá hiệp, 31/10)
    Giao diện từ mẫu thiet-ke/mau-tap-v4 (thầy "ok build" 26/10). Dữ liệu THẬT: web/js/kho.js → KHO.tap
    (mwUsers/{uid}/tap: hoso · n_<YYYY-MM> · anh). Giáo án mặc định: ./giao-an.js (chỉ để tạo hồ sơ lần đầu).
 
@@ -47,6 +47,7 @@ const P = {
   note: '<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/>',
   cam: '<path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3z"/><circle cx="12" cy="13" r="3"/>',
   bike: '<circle cx="5.5" cy="17.5" r="3.5"/><circle cx="18.5" cy="17.5" r="3.5"/><path d="M15 6a1 1 0 1 0 0-2 1 1 0 0 0 0 2zM12 17.5V14l-3-3 4-3 2 3h2"/>',
+  info: '<circle cx="12" cy="12" r="9.5"/><path d="M12 11v5.5M12 7.6v.1"/>', trash: '<path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"/>',
   rain: '<path d="M20 16.6A5 5 0 0 0 18 7h-1.3A8 8 0 1 0 4 15.3"/><path d="M8 19v2M8 13v2M16 19v2M16 13v2M12 21v2M12 15v2"/>',
 };
 const ic = (n, st = '') => `<svg class="i" viewBox="0 0 24 24"${st ? ` style="${st}"` : ''}>${P[n] || ''}</svg>`;
@@ -80,7 +81,8 @@ const dayIdx = (s) => Math.round((pd(s) - pd(START())) / 864e5);
 const weekNo = (s) => Math.floor(dayIdx(s) / 7) + 1;
 const hasMorning = (day) => pd(day).getDay() !== 0;
 const lg = (d) => LOG[d] || (LOG[d] = { sang: 0, b: {} });
-function setsOf(it, day) { const L = LB(day, it[0]); return weekNo(day) <= 2 && it[1] >= 3 && L.loai !== 'tick' ? it[1] - 1 : it[1]; }
+/* (v2.8.0) nhật ký `sn:{<mã bài>: số hiệp}` = thầy tự thêm/xoá hiệp trong ngày đó (đè số hiệp của giáo án) */
+function setsOf(it, day) { const sn = LOG[day] && LOG[day].sn && LOG[day].sn[it[0]]; if (sn) return sn; const L = LB(day, it[0]); return weekNo(day) <= 2 && it[1] >= 3 && L.loai !== 'tick' ? it[1] - 1 : it[1]; }
 function exState(day, it) { const n = setsOf(it, day), a = (LOG[day] && LOG[day].b && LOG[day].b[it[0]]) || []; const d = a.filter((x) => x && x[2]).length; return { n, d, done: d >= n }; }
 function dayPct(day) {
   const s = sessOf(day), L = LOG[day]; if (!L || !s) return 0;
@@ -173,7 +175,7 @@ export function tapGan(host, opt) {
   if (H) H.huy();
   const phone = opt && opt.dev === 'phone';
   host.innerHTML = `<div class="tp${phone ? ' phone' : ''}"><div class="t-head" id="tH"></div><div class="t-body" id="tB"></div>
-    <nav class="t-pnav" id="tN"></nav><div class="t-tipb" id="tT"></div><input type="file" accept="image/*" id="tF" hidden></div>`;
+    <nav class="t-pnav" id="tN"></nav><div class="t-tipb" id="tT"></div><input type="file" accept="image/*" id="tF" hidden><div class="t-menu" id="tM"></div></div>`;
   const root = host.firstElementChild, $ = (id) => root.querySelector('#' + id);
   /* (v2.5.0) điện thoại: 4 thẻ vẽ vào THANH DƯỚI của app (opt.nav = #pbar) ⇒ thanh nhạc myMusic nằm ngay trên nó */
   const NAV = (opt && opt.nav) || null;
@@ -214,7 +216,7 @@ export function tapGan(host, opt) {
   let cu = null;          /* { tab, ds: [chuỗi HTML từng khối con] } của lần vẽ trước */
   function body(anim) {
     const b = $('tB'), y = b.scrollTop, tmp = document.createElement('div');
-    requestAnimationFrame(() => b.querySelectorAll('details[data-how][open]').forEach(chayClip));
+    requestAnimationFrame(() => b.querySelectorAll('.t-how.on[data-how]').forEach(chayClip));
     tmp.innerHTML = { hom: homHtml, tuan: tuanHtml, so: soHtml, hs: hsHtml }[S.tab]();
     const moi = [...tmp.children], ds = moi.map((el) => el.outerHTML);
     if (!anim && cu && cu.tab === S.tab && cu.ds.length === ds.length && b.children.length === ds.length) {
@@ -283,32 +285,36 @@ export function tapGan(host, opt) {
     const id = it[0], lb = LB(day, id), st = exState(day, it), open = S.open[day + id], a = lg(day).b[id] || [];
     const pct = st.d && !st.done ? Math.round(100 * st.d / st.n) : 0;
     const sg = khoa(day) ? null : suggest(it, day), last = lastOf(id, day), unit = lb.loai === 'giay' ? 'giây' : 'lần';
-    let sets;
+    /* (v2.8.0) MỌI loại bài cùng 1 lưới: số thứ tự · ô số (hoặc nhãn) · ô tích VUÔNG nhỏ bên phải.
+       Mỗi dòng hiệp: vuốt trái ⇒ nút Xoá (điện thoại) · chuột phải ⇒ menu Xoá hiệp (máy tính). Dòng cuối: ＋ thẳng cột số thứ tự. */
+    const ro = khoa(day), rows = lb.loai === 'tick' ? st.n : Math.max(st.n, a.length);
+    const stp = (i, k, inner) => `<span class="t-stp"><button data-st="${id}|${i}|${k}|-1">−</button>${inner}<button data-st="${id}|${i}|${k}|1">+</button></span>`;
+    const row = (i, mid) => { const on = a[i] && a[i][2]; return `<div class="t-set${on ? ' dn' : ''}" data-row="${id}|${i}"><div class="t-sw"><span class="t-no">${i + 1}</span>${mid}
+      <span class="t-sq${on ? ' on' : ''}" data-sk="${id}|${i}" title="Tích hiệp này"></span></div>${ro ? '' : `<button class="t-del" data-del="${id}|${i}">Xoá</button>`}</div>`; };
+    let sets = '';
     if (lb.loai === 'tick') {
-      sets = `<div class="t-sets row">${Array.from({ length: st.n }, (_, i) => { const on = a[i] && a[i][2]; return `<span class="t-set${on ? ' dn' : ''}">${st.n > 1 ? 'Vòng ' + (i + 1) : 'Xong'} <span class="t-ck${on ? ' on' : ''}" data-sk="${id}|${i}"></span></span>`; }).join('')}</div>`;
+      if (st.n > 1) sets = `<div class="t-sets k1">${Array.from({ length: rows }, (_, i) => row(i, `<span class="t-lb">Vòng ${i + 1}</span>`)).join('')}${ro ? '' : `<button class="t-addset" data-add="${id}" title="Thêm vòng">${ic('plus')}</button>`}</div>`;
     } else {
-      const stp = (i, k, inner) => `<span class="t-stp"><button data-st="${id}|${i}|${k}|-1">−</button>${inner}<button data-st="${id}|${i}|${k}|1">+</button></span>`;
-      sets = `<div class="t-sets"><div class="t-shd"><span></span>${lb.loai === 'kg' ? '<span>kg</span>' : ''}<span>${unit}${it[3] ? ' / bên' : ''}</span></div>${Array.from({ length: Math.max(st.n, a.length) }, (_, i) => {
-        const x = a[i] || [], on = x[2];
-        return `<div class="t-set${on ? ' dn' : ''}"><span class="t-no"><span class="w">Hiệp </span>${i + 1}</span>
-          ${lb.loai === 'kg' ? stp(i, 0, `<input class="t-num" data-in="${id}|${i}|0" inputmode="decimal" value="${+x[0] ? vn(x[0]) : ''}" placeholder="${((v) => v ? vn(v) : '')(soMoi(day, it, i, 0))}">`) + '<span class="u"> kg ×</span>' : ''}
-          ${stp(i, 1, `<input class="t-num" data-in="${id}|${i}|1" inputmode="numeric" value="${x[1] != null && x[1] !== '' ? x[1] : ''}" placeholder="${soMoi(day, it, i, 1) || ''}">`)}<span class="u"> ${unit}</span>
-          <span class="t-ck${on ? ' on' : ''}" data-sk="${id}|${i}" title="Tích hiệp này"></span></div>`;
-      }).join('')}<div><button class="t-addset" data-add="${id}">+ Hiệp</button></div></div>`;
+      const kg = lb.loai === 'kg';
+      sets = `<div class="t-sets${kg ? ' k2' : ' k1'}"><div class="t-shd"><span></span>${kg ? '<span>kg</span>' : ''}<span>${unit}${it[3] ? ' / bên' : ''}</span></div>${Array.from({ length: rows }, (_, i) => {
+        const x = a[i] || [];
+        return row(i, `${kg ? stp(i, 0, `<input class="t-num" data-in="${id}|${i}|0" inputmode="decimal" value="${+x[0] ? vn(x[0]) : ''}" placeholder="${((v) => v ? vn(v) : '')(soMoi(day, it, i, 0))}">`) : ''}
+          ${stp(i, 1, `<input class="t-num" data-in="${id}|${i}|1" inputmode="numeric" value="${x[1] != null && x[1] !== '' ? x[1] : ''}" placeholder="${soMoi(day, it, i, 1) || ''}">`)}`);
+      }).join('')}${ro ? '' : `<button class="t-addset" data-add="${id}" title="Thêm hiệp">${ic('plus')}</button>`}</div>`;
     }
     const lastTxt = last && lb.loai !== 'tick' ? `${dm(last.day)}: ${last.a.map((x) => lb.loai === 'kg' && +x[0] ? `${vn(x[0])}×${x[1]}` : x[1]).join(' · ')}` : '';
     const tg = lb.loai === 'tick' && st.n === 1 ? it[2] : `${st.n} × ${it[2]}`;
     return `<div class="t-ex${st.done ? ' dn' : ''}${open ? ' op' : ''}">
       <div class="t-exh" data-tog="${id}"><span class="t-ck${st.done ? ' on' : pct ? ' part' : ''}" style="--p:${pct}%" data-ckall="${id}" title="Tích cả bài"></span>
-       <div class="t-tt">${esc(lb.ten)}</div><span class="t-tg">${esc(tg)}</span><span class="t-car">${ic('down', 'width:16px;height:16px')}</span></div>
+       <div class="t-tt"><span>${esc(lb.ten)}</span><button class="t-info${S.how[day + id] ? ' on' : ''}" data-info="${day + id}" title="Cách tập">${ic('info')}</button></div><span class="t-tg">${esc(tg)}</span><span class="t-car">${ic('down', 'width:16px;height:16px')}</span></div>
       <div class="t-exb"><div><div class="t-exin">
-       ${sg || lastTxt ? `<div class="t-hint">${sg ? `<span class="t-sug${sg.up ? ' up' : ''}">${sg.up ? ic('up', 'width:13px;height:13px') : ''}<span>${sg.txt}</span></span>` : ''}${lastTxt ? `<span class="t-last" title="Lần trước">${lastTxt}</span>` : ''}</div>` : ''}
-       ${sets}
-       <details class="t-how" data-how="${day + id}"${S.how[day + id] ? ' open' : ''}><summary>${ic('book', 'width:14px;height:14px')} Cách tập</summary>
+       <div class="t-how${S.how[day + id] ? ' on' : ''}" data-how="${day + id}"><div><div class="t-howin">
         ${API && API.clip && CLIP[id] ? `<video class="t-clip" data-clip="${CLIP[id]}" muted loop playsinline preload="none"></video>` : `<div class="t-fig" data-fig="${id}"></div>`}
         <ol>${(lb.cach || []).map((x) => `<li>${esc(x)}</li>`).join('')}</ol>
         ${lb.de ? `<div style="margin-top:6px"><b>Bản dễ:</b> ${esc(lb.de)}</div>` : ''}
-        ${lb.loi && lb.loi.length ? `<div class="t-bad"><b>Lỗi hay gặp:</b> ${esc(lb.loi.join(' '))}</div>` : ''}</details>
+        ${lb.loi && lb.loi.length ? `<div class="t-bad"><b>Lỗi hay gặp:</b> ${esc(lb.loi.join(' '))}</div>` : ''}</div></div></div>
+       ${sg || lastTxt ? `<div class="t-hint">${sg ? `<span class="t-sug${sg.up ? ' up' : ''}">${sg.up ? ic('up', 'width:13px;height:13px') : ''}<span>${sg.txt}</span></span>` : ''}${lastTxt ? `<span class="t-last" title="Lần trước">${lastTxt}</span>` : ''}</div>` : ''}
+       ${sets}
       </div></div></div></div>`;
   }
 
@@ -522,6 +528,7 @@ export function tapGan(host, opt) {
   const doi = () => { luuNgay(S.day); if (API && API.khiDoi) API.khiDoi(); };
   function onClick(e) {
     const T = e.target;
+    if (Date.now() - chanBam < 350) return;
     const tb = T.closest('[data-tab]'); if (tb) { if (S.tab === tb.dataset.tab) return; S.tab = tb.dataset.tab; S.big = null; S.goc = false; ve(true); return; }
     if (T.closest('[data-a="wake"]')) { S.wake = !S.wake; nho.wake = S.wake; ghiNho(); wake(S.wake); head(); API.toast(S.wake ? 'Giữ sáng màn hình: BẬT' : 'Giữ sáng màn hình: TẮT'); return; }
     if (T.closest('[data-a="homnay"]')) { S.day = today(); ve(); return; }
@@ -583,9 +590,60 @@ export function tapGan(host, opt) {
       }
       doi(); body(); const c2 = root.querySelector(`[data-ckall="${id}"]`); if (c2) c2.classList.add('just'); return;
     }
-    const ad = T.closest('[data-add]'); if (ad) { if (ro) return; const L = lg(day), id = ad.dataset.add, a = L.b[id] || (L.b[id] = []), n = exState(day, itemOf(day, id)).n; while (a.length < n) a.push([]); a.push([]); doi(); body(); return; }
-    const tg = T.closest('[data-tog]'); if (tg && !T.closest('input')) { const k = day + tg.dataset.tog; S.open[k] = !S.open[k]; tg.closest('.t-ex').classList.toggle('op', !!S.open[k]); }
+    /* (v2.8.0) ＋ = thêm 1 hiệp (ghi số hiệp của ngày vào `sn`) */
+    const ad = T.closest('[data-add]'); if (ad) { if (ro) return; const L = lg(day), id = ad.dataset.add, a = L.b[id] || (L.b[id] = []), lb = LB(day, id), n = exState(day, itemOf(day, id)).n;
+      const m = (lb.loai === 'tick' ? n : Math.max(n, a.length)) + 1; while (a.length < m) a.push([]); (L.sn || (L.sn = {}))[id] = m; doi(); body(); return; }
+    const dl = T.closest('[data-del]'); if (dl) { e.stopPropagation(); xoaHiep(dl.dataset.del); return; }
+    /* (v2.8.0) nút ⓘ cạnh tên bài: mở/đóng hướng dẫn ngay dưới tiêu đề */
+    const inf = T.closest('[data-info]'); if (inf) { e.stopPropagation(); const k = inf.dataset.info, on = !S.how[k]; S.how[k] = on; inf.classList.toggle('on', on);
+      const hb = root.querySelector(`.t-how[data-how="${k}"]`); if (hb) { hb.classList.toggle('on', on); chayClip(hb); } return; }
+    const tg = T.closest('[data-tog]'); if (tg && !T.closest('input')) {
+      /* (v2.8.0) mở 1 bài ⇒ các bài khác của ngày đó gập lại */
+      const k = day + tg.dataset.tog, on = !S.open[k];
+      Object.keys(S.open).forEach((x) => { if (x.startsWith(day)) delete S.open[x]; });
+      if (on) S.open[k] = true;
+      root.querySelectorAll('.t-ex.op').forEach((el) => { if (el !== tg.closest('.t-ex')) el.classList.remove('op'); });
+      tg.closest('.t-ex').classList.toggle('op', on);
+      root.querySelectorAll('.t-how.on[data-how]').forEach(chayClip);
+    }
   }
+  /* (v2.8.0) xoá 1 hiệp: bỏ dòng đó, các hiệp sau dồn lên; số hiệp của ngày giảm 1 (tối thiểu 1) */
+  function xoaHiep(key) {
+    const day = S.day; dongMenu(); if (khoa(day)) return;
+    const [id, i] = key.split('|'), L = lg(day), a = L.b[id] || (L.b[id] = []), lb = LB(day, id), n = exState(day, itemOf(day, id)).n;
+    const m = lb.loai === 'tick' ? n : Math.max(n, a.length); if (m <= 1) { API.toast('Bài cần ít nhất 1 hiệp'); dongVuot(); return; }
+    a.splice(+i, 1); (L.sn || (L.sn = {}))[id] = m - 1; dongVuot(); doi(); body();
+  }
+  /* (v2.8.0) VUỐT TRÁI dòng hiệp ⇒ lộ nút Xoá (kiểu iPhone) · chuột phải ⇒ menu nhỏ "Xoá hiệp" */
+  let vu = null, moVuot = null, chanBam = 0;
+  const dongVuot = (tru) => { if (moVuot && moVuot !== tru) { moVuot.style.transform = ''; moVuot.parentNode.classList.remove('sw'); } if (moVuot !== tru) moVuot = null; };
+  root.addEventListener('pointerdown', (e) => {
+    if (S.menu && !e.target.closest('#tM')) dongMenu();
+    const sw = e.target.closest('.t-sw'); if (!sw || e.button !== 0 || e.target.closest('input')) { if (!e.target.closest('.t-del')) dongVuot(); return; }
+    dongVuot(sw); vu = { sw, x: e.clientX, y: e.clientY, dx: 0, go: false, x0: moVuot === sw ? -76 : 0 };
+  });
+  root.addEventListener('pointermove', (e) => {
+    if (!vu) return; const dx = e.clientX - vu.x, dy = e.clientY - vu.y;
+    if (!vu.go) { if (Math.abs(dy) > 8 && Math.abs(dy) > Math.abs(dx)) { vu = null; return; } if (Math.abs(dx) < 8) return; vu.go = true; vu.sw.classList.add('keo'); vu.sw.parentNode.classList.add('kv'); if (root.contains(document.activeElement)) document.activeElement.blur(); try { vu.sw.setPointerCapture(e.pointerId); } catch (x) {} }
+    vu.dx = Math.min(0, Math.max(-110, vu.x0 + dx)); vu.sw.style.transform = `translateX(${vu.dx}px)`;
+  });
+  const thaVuot = () => {
+    if (!vu) return; const { sw, go, dx } = vu; vu = null; sw.classList.remove('keo'); sw.parentNode.classList.remove('kv'); if (!go) return;
+    const mo = dx < -38; sw.style.transform = mo ? 'translateX(-76px)' : ''; sw.parentNode.classList.toggle('sw', mo); moVuot = mo ? sw : null;
+    chanBam = Date.now();   /* vuốt xong không tính là bấm */
+  };
+  root.addEventListener('pointerup', thaVuot); root.addEventListener('pointercancel', thaVuot);
+  root.addEventListener('contextmenu', (e) => {
+    const r = e.target.closest('[data-row]'); if (!r || khoa(S.day) || e.target.closest('input')) return; e.preventDefault(); e.stopPropagation();
+    const [id, i] = r.dataset.row.split('|'), lb = LB(S.day, id), m = root.querySelector('#tM'), bx = root.getBoundingClientRect();
+    S.menu = r.dataset.row;
+    m.innerHTML = `<button data-del="${r.dataset.row}">${ic('trash')}Xoá ${lb.loai === 'tick' ? 'vòng' : 'hiệp'} ${+i + 1}</button>`;
+    m.style.left = Math.min(e.clientX - bx.left, bx.width - 170) + 'px'; m.style.top = (e.clientY - bx.top) + 'px'; m.classList.add('on');
+  });
+  const dongMenu = () => { S.menu = null; const m = root.querySelector('#tM'); if (m) m.classList.remove('on'); };
+  const ngoaiMenu = (e) => { if (S.menu && !e.target.closest('#tM')) dongMenu(); };
+  const escMenu = (e) => { if (e.key === 'Escape' && S.menu) dongMenu(); };
+  document.addEventListener('pointerdown', ngoaiMenu, true); document.addEventListener('keydown', escMenu);
   /* ô số an toàn: lăn chuột KHÔNG đổi số (ô là text), Enter = nhận ô và nhảy ô kế tiếp */
   function onKey(e) {
     const t = e.target; if (e.key !== 'Enter' || !t.matches('input.t-num,input.t-note')) return; e.preventDefault();
@@ -638,14 +696,14 @@ export function tapGan(host, opt) {
   function onInput(e) { const t = e.target; if (t.classList.contains('t-num')) t.value = t.value.replace(t.dataset.hs === 'cao' ? /[^0-9.,mM]/g : /[^0-9.,]/g, ''); }
   root.addEventListener('click', onClick); root.addEventListener('keydown', onKey); root.addEventListener('change', onChange); root.addEventListener('input', onInput);
   /* (v2.5.0) nhớ mục "Cách tập" đang mở (khung vẽ lại không đóng mất) + hình động chỉ chạy ở mục đang mở */
-  root.addEventListener('toggle', (e) => { const d = e.target; if (d.dataset && d.dataset.how) { S.how[d.dataset.how] = d.open; chayClip(d); } }, true);
-  /* (v2.7.0) clip hướng dẫn: gắn nguồn lúc mở lần đầu, đóng thì dừng */
+  /* (v2.7.0) clip hướng dẫn: gắn nguồn lúc mở lần đầu, đóng thì dừng · (v2.8.0) khối hướng dẫn = .t-how.on (không còn <details>) */
   function chayClip(d) {
     const v = d.querySelector('video.t-clip'); if (!v) return;
-    if (!d.open) { v.pause(); return; }
+    const mo = () => d.classList.contains('on') && d.closest('.t-ex.op');
+    if (!mo()) { v.pause(); return; }
     if (v.src) { v.play().catch(() => {}); return; }
     if (v.dataset.dang) return; v.dataset.dang = 1;
-    API.clip(v.dataset.clip).then((u) => { v.src = u; if (d.open) v.play().catch(() => {}); },
+    API.clip(v.dataset.clip).then((u) => { v.src = u; if (mo()) v.play().catch(() => {}); },
       () => { v.removeAttribute('data-dang'); v.classList.add('loi'); });
   }
   const dungHinh = chayHinh(root);
@@ -657,7 +715,7 @@ export function tapGan(host, opt) {
     /* kho vừa đổi (máy khác / tiếng vọng): đang gõ dở thì đợi rời ô */
     veTuXa() { const f = document.activeElement; if (f && root.contains(f) && f.matches('input')) { f.addEventListener('blur', () => setTimeout(() => H && H.host === host && ve(), 0), { once: true }); return; } ve(); },
     vePnav,
-    huy() { wake(false); dungHinh(); if (NAV) NAV.removeEventListener('click', onNav); document.removeEventListener('visibilitychange', onVis); removeEventListener('resize', onRs); if (H && H.host === host) H = null; },
+    huy() { document.removeEventListener('pointerdown', ngoaiMenu, true); document.removeEventListener('keydown', escMenu); wake(false); dungHinh(); if (NAV) NAV.removeEventListener('click', onNav); document.removeEventListener('visibilitychange', onVis); removeEventListener('resize', onRs); if (H && H.host === host) H = null; },
   };
   return H;
 }

@@ -147,7 +147,7 @@ function veHinh(svg, id, ms) {
 export function chayHinh(root) {
   let an = 0;
   const vong = (ts) => {
-    root.querySelectorAll('details[open] [data-fig]').forEach((el) => {
+    root.querySelectorAll('.t-ex.op .t-how.on [data-fig]').forEach((el) => {
       let s = el.firstElementChild;
       if (!s) { el.innerHTML = '<svg viewBox="0 0 200 140" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"></svg>'; s = el.firstElementChild; }
       veHinh(s, el.dataset.fig, ts);

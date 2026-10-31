@@ -256,24 +256,42 @@ function veThanh() {
   if (!THANH) return; const b = BAI(Q.id);
   THANH.hidden = !b; document.querySelector('.frame') && document.querySelector('.frame').classList.toggle('cophat', !!b);
   if (!b) { THANH.innerHTML = ''; return; }
-  THANH.innerHTML = `<div class="n-mp" data-n="full"><span class="n-art" style="background:${mauCua(b.id)}">${ic('note')}</span>
-    <div class="n-tt"><b>${esc(b.ten)}</b><span>${MAY.has(b.id) ? `<i class="n-tic">${ic('ok')}</i>Trong máy · ` : ''}${esc(b.ca || Q.ten || 'myMusic')}</span></div>
-    <button data-n="prev" title="Bài trước">${ic('prev')}</button><button class="pl" data-n="pp" title="Phát / Dừng">${ic(AU.paused ? 'play' : 'pause')}</button><button data-n="next" title="Bài sau">${ic('next')}</button><i class="n-pg"></i></div>`;
+  /* (v2.8.0) thanh MẢNH ở hàng trên cùng (cùng hàng ☰ / 🔍) — bấm giữa ⇒ pop-up nổi 50 % */
+  THANH.innerHTML = `<div class="n-mp${AU.paused ? '' : ' on'}" data-n="full"><span class="n-art" style="background:${mauCua(b.id)}">${ic('note')}</span>
+    <div class="n-tt">${esc(b.ten)} <span>· ${esc(b.ca || Q.ten || 'myMusic')}</span></div>
+    <button data-n="prev" title="Bài trước">${ic('prev')}</button><button class="pl" data-n="pp" title="Phát / Dừng">${ic(AU.paused ? 'play' : 'pause')}</button><button data-n="next" title="Bài sau">${ic('next')}</button><span class="n-pgw"><i class="n-pg"></i></span></div>`;
   tienDo();
+}
+/* (v2.8.0) pop-up đặt ngay dưới thanh nhạc: điện thoại = rộng gần hết, máy tính = canh phải dưới thanh */
+function datChoPop() {
+  const app = FULL.offsetParent, mp = THANH && THANH.querySelector('.n-mp'); if (!app || !mp) return;
+  const a = app.getBoundingClientRect(), r = mp.getBoundingClientRect();
+  FULL.style.top = (r.bottom - a.top + 8) + 'px';
+  if (phone) { FULL.style.left = '10px'; FULL.style.right = '10px'; FULL.style.width = ''; }
+  else { FULL.style.left = ''; FULL.style.right = Math.max(10, a.right - r.right) + 'px'; FULL.style.width = Math.max(380, r.width) + 'px'; }
+}
+let ngoaiGan = false;
+function ganNgoai() {
+  if (ngoaiGan) return; ngoaiGan = true;
+  document.addEventListener('pointerdown', (e) => { if (!V.full || !FULL) return; if (FULL.contains(e.target) || (THANH && THANH.contains(e.target))) return; V.full = false; veFull(); }, true);
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && V.full) { V.full = false; veFull(); } });
+  addEventListener('resize', () => { if (V.full && FULL) datChoPop(); });
 }
 function veFull() {
   if (!FULL) return; FULL.classList.toggle('on', V.full && !!BAI(Q.id)); const b = BAI(Q.id);
   if (!b || !V.full) return;
   const d = AU.duration || b.dai || 0;
-  FULL.innerHTML = `<div class="n-fhead"><button data-n="dong" title="Thu nhỏ">${ic('down')}</button><span>${esc(Q.ten || 'myMusic')}</span></div>
-   <div class="n-cov" style="background:linear-gradient(140deg,${mauCua(b.id)},#0b3b35)">${ic('note')}</div>
-   <h3>${esc(b.ten)}</h3><div class="n-ca">${esc(b.ca || '')}</div>
+  datChoPop();
+  /* (v2.8.0) POP-UP nổi 50 % màn hình (không mở hẳn trang) — bấm chỗ khác thì thu lại; "Thư viện" mới mở trang myMusic */
+  FULL.innerHTML = `<div class="n-fhd"><span class="n-cov" style="background:${mauCua(b.id)}">${ic('note')}</span>
+    <div class="n-fti"><h3>${esc(b.ten)}</h3><div class="n-ca">${MAY.has(b.id) ? `<i class="n-tic">${ic('ok')}</i>Trong máy · ` : ''}${esc(b.ca || Q.ten || '')}</div></div>
+    <button class="n-tv" data-n="trang">Thư viện</button></div>
    <input type="range" class="n-sl" min="0" max="${Math.floor(d)}" value="${Math.floor(AU.currentTime)}" step="1"><div class="n-tm"><span class="n-t1">${mmss(AU.currentTime)}</span><span class="n-t2">${mmss(d)}</span></div>
    <div class="n-ctl"><button class="sm${Q.shuf ? ' on' : ''}" data-n="shuf" title="Trộn bài">${ic('shuf')}</button><button data-n="prev">${ic('prev')}</button>
     <button class="pl" data-n="pp">${ic(AU.paused ? 'play' : 'pause')}</button><button data-n="next">${ic('next')}</button>
     <button class="sm${Q.rep !== 'khong' ? ' on' : ''}" data-n="rep" title="Lặp: ${Q.rep === 'mot' ? '1 bài' : Q.rep === 'het' ? 'cả danh sách' : 'tắt'}">${ic('rep')}${Q.rep === 'mot' ? '<i class="one">1</i>' : ''}</button></div>
    ${phone ? '' : `<div class="n-vol">${ic('vol')}<input type="range" class="n-vl" min="0" max="1" step="0.05" value="${AU.volume}"></div>`}
-   <div class="n-ql"><h4>Đang phát · ${Q.ds.length} bài</h4>${Q.ds.map(BAI).filter(Boolean).map((x) => `<div class="n-q${x.id === Q.id ? ' on' : ''}" data-q="${x.id}"><span class="n-sa" style="background:${mauCua(x.id)}"></span><div>${esc(x.ten)}<small>${esc(x.ca || '')}</small></div><em>${mmss(x.dai)}</em></div>`).join('')}</div>`;
+   <div class="n-ql">${Q.ds.map(BAI).filter(Boolean).map((x) => `<div class="n-q${x.id === Q.id ? ' on' : ''}" data-q="${x.id}"><span class="n-sa" style="background:${mauCua(x.id)}"></span><div>${esc(x.ten)}<small>${esc(x.ca || '')}</small></div><em>${mmss(x.dai)}</em></div>`).join('')}</div>`;
   tienDo();
 }
 
@@ -356,10 +374,11 @@ function onClick(e) {
   if (xmay) { if (!V.menu.hoiMay) { V.menu.hoiMay = true; veTrang(); return; } xoaMay(xmay.dataset.xoamay).then(() => { API.toast('Đã xoá bản trong máy'); ve(); }); V.menu = null; veTrang(); return; }
   if (n) {
     const k = n.dataset.n;
-    if (k === 'full') { if (T.closest('button')) return; V.full = true; veFull(); return; }
+    if (k === 'full') { if (T.closest('button')) return; V.full = !V.full; veFull(); return; }
     e.stopPropagation();
     if (k === 'pp') batTat(); else if (k === 'next') buoc(1); else if (k === 'prev') buoc(-1);
     else if (k === 'dong') { V.full = false; veFull(); }
+    else if (k === 'trang') { V.full = false; veFull(); if (API && API.moTrang) API.moTrang(); }
     else if (k === 'shuf') { Q.shuf = !Q.shuf; if (Q.shuf && Q.ds.length > 1) { const r = tron(Q.ds.filter((x) => x !== Q.id)); Q.ds = [Q.id, ...r]; } ghiNho(); veFull(); }
     else if (k === 'rep') { Q.rep = Q.rep === 'het' ? 'mot' : Q.rep === 'mot' ? 'khong' : 'het'; ghiNho(); veFull(); API.toast(Q.rep === 'het' ? 'Lặp cả danh sách' : Q.rep === 'mot' ? 'Lặp 1 bài' : 'Tắt lặp'); }
     else if (k === 'them') { const f = TRANG && TRANG.querySelector('.n-file'); if (f) { f.value = ''; f.click(); } }
@@ -422,7 +441,7 @@ export function nhacNap(dl) {
 /* thanh mini (trong .main, trên thanh dưới) + trình phát lớn (phủ .app) — gắn lại sau mỗi lần index vẽ khung */
 export function nhacGanThanh(bar, full, opt) {
   phone = !!(opt && opt.dev === 'phone');
-  THANH = bar; FULL = full;
+  THANH = bar; FULL = full; ganNgoai();
   if (bar && !bar._n) { bar._n = 1; bar.addEventListener('click', onClick); }
   if (full && !full._n) { full._n = 1; full.addEventListener('click', onClick); full.addEventListener('input', onInput); }
   veThanh(); veFull();

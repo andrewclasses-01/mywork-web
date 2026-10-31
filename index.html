@@ -1102,9 +1102,8 @@ function shell(){
     <aside class="side" id="side"><div class="navpill" id="navpill"></div><div id="sideIn"></div></aside>
     <div class="rsz" data-rsz="side" title="Kéo để đổi độ rộng · bấm đúp = mặc định"></div>
     <section class="main" id="main">
-      <div class="ptop"><button data-a="drawer">${ic('menu')}</button><span style="margin-left:auto"></span><button data-a="cmdk">${ic('search')}</button></div>
+      <div class="ptop"><button data-a="drawer">${ic('menu')}</button><div class="mpbar" id="mpBar" hidden></div><button data-a="cmdk">${ic('search')}</button></div>
       <div id="mainc" class="mainc"><div id="mhead"></div><div id="mlHost" class="mlhost" hidden></div><div id="tapHost" class="taphost" hidden></div><div id="nhacHost" class="nhachost" hidden></div><div id="fbar"></div><div class="body" id="mbody"></div><div class="qa" id="qa"></div></div>
-      <div class="mpbar" id="mpBar" hidden></div>
       <nav class="pbar" id="pbar"></nav>
     </section>
     <div class="scrim" id="scrim" data-a="scrim"></div>
@@ -1607,7 +1606,7 @@ function showNhac(on){
 }
 /* nối myMusic với kho (sau đăng nhập) */
 function noiNhac(){
-  const go=()=>{window.NHAC.nhacNoi({ghi:window.KHO.nhac.ghi,tai:window.KHO.nhac.tai,xoa:window.KHO.nhac.xoa,toast:m=>toast(m)});
+  const go=()=>{window.NHAC.nhacNoi({ghi:window.KHO.nhac.ghi,tai:window.KHO.nhac.tai,xoa:window.KHO.nhac.xoa,toast:m=>toast(m),moTrang:()=>navTo('nhac')});
     window.NHAC.nhacGanThanh($('mpBar'),$('mpFull'),{dev:S.dev});
     window.KHO.nhac.nghe(dl=>window.NHAC.nhacNap(dl));};
   if(window.NHAC)go();else addEventListener('nhac-ready',go,{once:true});

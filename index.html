@@ -1099,7 +1099,7 @@ function scope(nav){
   if(nav==='done')return{title:'Đã hoàn thành',emoji:'✅',pred:t=>t.done,onlyDone:1,grp:'doneAt'};
   if(nav==='mylink')return{title:'myLink',mylink:1,pred:()=>false};
   if(nav==='tap')return{title:'Tập luyện',tap:1,pred:()=>false};
-  if(nav==='nhac')return{title:'myMusic',nhac:1,pred:()=>false};   /* (v2.5.0) kho nhạc riêng — web/nhac/nhac.js */   /* (v2.4.0) mục Tập luyện — web/tap/tap.js */
+  if(nav==='nhac')return{title:'Âm nhạc',nhac:1,pred:()=>false};   /* (v2.5.0) kho nhạc riêng — web/nhac/nhac.js */   /* (v2.4.0) mục Tập luyện — web/tap/tap.js */
   if(nav.startsWith('v:')){const v=DB.views.find(x=>'v:'+x.id===nav);if(!v)return scope('all');
     return{title:v.name,saved:fltText(v.f,v.grp),savedV:v,pred:fltPred(v.f),grpBy:v.grp,defView:v.view,
       newT:Object.assign({},v.f.lists&&v.f.lists.length===1?{list:v.f.lists[0]}:{},v.f.tags?{tags:[...v.f.tags]}:{})};}
@@ -2393,12 +2393,13 @@ document.addEventListener('keydown',e=>{
 /* thêm việc ở cột Kanban: gắn trạng thái của cột */
 const _add=addQA;addQA=function(txt){_add(txt);if(S.qaStatus){const t=DB.tasks[DB.tasks.length-1];setStatus(t,S.qaStatus);S.qaStatus=null;renderMain();}};
 
+/* (v2.10.2) thanh dưới điện thoại: "Có hạn" (thầy bỏ ở v2.9.0) ⇒ "Việc" icon nhà, giữ 2 nút mỗi bên nút + */
 function renderPbar(){
   if(S.nav==='tap'&&S.tapH&&S.dev==='phone'&&S.tapH.vePnav)return S.tapH.vePnav();   /* (v2.5.0) ở Tập luyện: thanh dưới = 4 thẻ tập */
   $('pbar').innerHTML=`<button class="${S.nav==='myday'?'on':''}" data-nav="myday">${ic('sun')}Hôm nay</button>
    <button class="${S.nav==='important'?'on':''}" data-nav="important">${ic('star')}Quan trọng</button>
    <button class="fab" data-a="fab">${ic('plus')}</button>
-   <button class="${S.nav==='planned'?'on':''}" data-nav="planned">${ic('cal')}Có hạn</button>
+   <button class="${S.nav==='l:inbox'?'on':''}" data-nav="l:inbox">${ic('home')}Việc</button>
    <button data-a="drawer">${ic('list')}Danh sách</button>`;
 }
 /* (v2.0.0) cửa sổ hẹp (< 760px) ⇒ giao diện điện thoại */

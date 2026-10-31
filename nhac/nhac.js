@@ -185,7 +185,7 @@ AU.addEventListener('error', () => { if (AU.src === LANG || !AU.src) return; if 
 function phien() {
   const ms = navigator.mediaSession; const b = BAI(Q.id); if (!ms || !b) return;
   try {
-    ms.metadata = new MediaMetadata({ title: b.ten, artist: b.ca || '', album: Q.ten || 'myMusic', artwork: [{ src: 'icon-512.png?v=2', sizes: '512x512', type: 'image/png' }] });
+    ms.metadata = new MediaMetadata({ title: b.ten, artist: b.ca || '', album: Q.ten || 'Âm nhạc', artwork: [{ src: 'icon-512.png?v=2', sizes: '512x512', type: 'image/png' }] });
     ms.playbackState = AU.paused ? 'paused' : 'playing';
     ms.setActionHandler('play', () => AU.play()); ms.setActionHandler('pause', () => AU.pause());
     ms.setActionHandler('nexttrack', () => buoc(1)); ms.setActionHandler('previoustrack', () => buoc(-1));
@@ -260,7 +260,7 @@ function veThanh() {
   if (!b) { THANH.innerHTML = ''; return; }
   /* (v2.8.0) thanh MẢNH ở hàng trên cùng (cùng hàng ☰ / 🔍) — bấm giữa ⇒ pop-up nổi 50 % */
   THANH.innerHTML = `<div class="n-mp${AU.paused ? '' : ' on'}" data-n="full"><span class="n-art" style="background:${mauCua(b.id)}">${ic('note')}</span>
-    <div class="n-tt">${esc(b.ten)} <span>· ${esc(b.ca || Q.ten || 'myMusic')}</span></div>
+    <div class="n-tt">${esc(b.ten)} <span>· ${esc(b.ca || Q.ten || 'Âm nhạc')}</span></div>
     <button data-n="prev" title="Bài trước">${ic('prev')}</button><button class="pl" data-n="pp" title="Phát / Dừng">${ic(AU.paused ? 'play' : 'pause')}</button><button data-n="next" title="Bài sau">${ic('next')}</button><span class="n-pgw"><i class="n-pg"></i></span></div>`;
   tienDo();
 }
@@ -450,7 +450,7 @@ export function nhacGanThanh(bar, full, opt) {
 }
 export function nhacGanTrang(host, opt) {
   phone = !!(opt && opt.dev === 'phone');
-  host.innerHTML = `<div class="nmus${phone ? ' phone' : ''}"><div class="n-top"><h1>myMusic</h1><button class="n-btn" data-n="them">${ic('plus')}Thêm nhạc</button>
+  host.innerHTML = `<div class="nmus${phone ? ' phone' : ''}"><div class="n-top"><h1>Âm nhạc</h1><button class="n-btn" data-n="them">${ic('plus')}Thêm nhạc</button>
      <input type="file" class="n-file" accept="audio/*,.mp3,.m4a,.aac,.wav,.ogg,.flac" multiple hidden></div><div class="n-body"></div></div>`;
   const root = host.firstElementChild; TRANG = root;
   root.addEventListener('click', onClick);

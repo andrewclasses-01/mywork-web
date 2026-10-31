@@ -598,7 +598,7 @@ export function tapGan(host, opt) {
     /* (v2.8.0) nút ⓘ cạnh tên bài: mở/đóng hướng dẫn ngay dưới tiêu đề */
     const rp = T.closest('[data-replay]'); if (rp) { e.stopPropagation(); const hb = rp.closest('[data-how]'); if (hb) { LUOT[hb.dataset.how] = 0; const v = hb.querySelector('video.t-clip'); if (v && v.src) v.currentTime = 0; chayClip(hb); } return; }
     const inf = T.closest('[data-info]'); if (inf) { e.stopPropagation(); const k = inf.dataset.info, on = !S.how[k]; S.how[k] = on; inf.classList.toggle('on', on);
-      if (on) LUOT[k] = 0;   /* mở lại ⓘ = muốn xem ⇒ phát lại 3 lượt */
+      if (on) LUOT[k] = 0;   /* mở lại ⓘ = muốn xem ⇒ phát lại 10 giây */
       const hb = root.querySelector(`.t-how[data-how="${k}"]`); if (hb) { hb.classList.toggle('on', on); chayClip(hb); } return; }
     const tg = T.closest('[data-tog]'); if (tg && !T.closest('input')) {
       /* (v2.8.0) mở 1 bài ⇒ các bài khác của ngày đó gập lại */
@@ -700,20 +700,21 @@ export function tapGan(host, opt) {
   root.addEventListener('click', onClick); root.addEventListener('keydown', onKey); root.addEventListener('change', onChange); root.addEventListener('input', onInput);
   /* (v2.5.0) nhớ mục "Cách tập" đang mở (khung vẽ lại không đóng mất) + hình động chỉ chạy ở mục đang mở */
   /* (v2.7.0) clip hướng dẫn: gắn nguồn lúc mở lần đầu, đóng thì dừng · (v2.8.0) khối hướng dẫn = .t-how.on (không còn <details>) */
-  /* (v2.10.0) thầy chốt: clip phát 3 LƯỢT rồi dừng (đỡ nóng máy), chạm nút ↻ để xem lại. Đếm theo bài-ngày (LUOT), vẽ lại khối không đếm lại. */
+  /* (v2.10.1) thầy chốt: clip phát khoảng 10 GIÂY rồi dừng (đỡ nóng máy) — lặp đến khi đủ 10 s thì dừng ở cuối lượt đang chạy (động tác trọn vẹn),
+     chạm nút ↻ để xem lại. LUOT[bài-ngày] = số giây đã phát; vẽ lại khối không đếm lại. */
   const LUOT = {};
   function chayClip(d) {
     const v = d.querySelector('video.t-clip'); if (!v) return;
     const k = d.dataset.how, w = v.parentElement;
     const mo = () => d.classList.contains('on') && d.closest('.t-ex.op');
-    const con = () => (LUOT[k] || 0) < 3;
+    const con = () => (LUOT[k] || 0) < 10;
     if (!v.dataset.gan) {
       v.dataset.gan = 1;
-      v.addEventListener('ended', () => { LUOT[k] = (LUOT[k] || 0) + 1; if (con() && mo()) { v.currentTime = 0; v.play().catch(() => {}); } else w.classList.add('xong'); });
+      v.addEventListener('ended', () => { LUOT[k] = (LUOT[k] || 0) + (v.duration || 1); if (con() && mo()) { v.currentTime = 0; v.play().catch(() => {}); } else w.classList.add('xong'); });
     }
     w.classList.toggle('xong', !con());
     if (!mo()) { v.pause(); return; }
-    if (!con()) { v.pause(); if (v.src || v.dataset.dang) return; }   /* đã đủ 3 lượt: chỉ tải để hiện khung hình, không phát */
+    if (!con()) { v.pause(); if (v.src || v.dataset.dang) return; }   /* đã đủ 10 giây: chỉ tải để hiện khung hình, không phát */
     if (v.src) { v.play().catch(() => {}); return; }
     if (v.dataset.dang) return; v.dataset.dang = 1;
     API.clip(v.dataset.clip).then((u) => { v.src = u; if (mo() && con()) v.play().catch(() => {}); },

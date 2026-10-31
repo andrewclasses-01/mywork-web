@@ -143,17 +143,28 @@ function veHinh(svg, id, ms) {
   if ((H.do || []).includes('ta2') && p.t2) g += ta(p.t2);
   svg.innerHTML = g;
 }
-/* gắn vào 1 khung gốc: vẽ mọi [data-fig] ĐANG HIỆN (trong <details open>) mỗi khung hình; trả hàm dừng */
+/* gắn vào 1 khung gốc: vẽ mọi [data-fig] ĐANG HIỆN; trả hàm dừng.
+   (v2.10.0) điện thoại NÓNG: vòng vẽ cũ chạy MÃI 60–120 lần/giây kể cả khi không có hình nào (đang xem clip, gập hướng dẫn).
+   Nay: không có hình đang hiện ⇒ NGHỈ HẲN (MutationObserver đánh thức khi mở bài / mở ⓘ) · vẽ tối đa 30 khung/giây · tab ẩn thì nghỉ. */
 export function chayHinh(root) {
-  let an = 0;
+  let an = 0, cuoi = -1e9, dung = false;
   const vong = (ts) => {
-    root.querySelectorAll('.t-ex.op .t-how.on [data-fig]').forEach((el) => {
-      let s = el.firstElementChild;
-      if (!s) { el.innerHTML = '<svg viewBox="0 0 200 140" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"></svg>'; s = el.firstElementChild; }
-      veHinh(s, el.dataset.fig, ts);
-    });
+    an = 0; if (dung || document.hidden) return;
+    const ds = root.querySelectorAll('.t-ex.op .t-how.on [data-fig]'); if (!ds.length) return;
+    if (ts - cuoi >= 33) {
+      cuoi = ts;
+      ds.forEach((el) => {
+        let s = el.firstElementChild;
+        if (!s) { el.innerHTML = '<svg viewBox="0 0 200 140" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"></svg>'; s = el.firstElementChild; }
+        veHinh(s, el.dataset.fig, ts);
+      });
+    }
     an = requestAnimationFrame(vong);
   };
-  an = requestAnimationFrame(vong);
-  return () => cancelAnimationFrame(an);
+  const chay = () => { if (!an && !dung && !document.hidden) an = requestAnimationFrame(vong); };
+  const mo = new MutationObserver(chay);
+  mo.observe(root, { subtree: true, childList: true, attributes: true, attributeFilter: ['class'] });
+  document.addEventListener('visibilitychange', chay);
+  chay();
+  return () => { dung = true; cancelAnimationFrame(an); an = 0; mo.disconnect(); document.removeEventListener('visibilitychange', chay); };
 }

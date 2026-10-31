@@ -47,6 +47,7 @@ const P = {
   note: '<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/>',
   cam: '<path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3z"/><circle cx="12" cy="13" r="3"/>',
   bike: '<circle cx="5.5" cy="17.5" r="3.5"/><circle cx="18.5" cy="17.5" r="3.5"/><path d="M15 6a1 1 0 1 0 0-2 1 1 0 0 0 0 2zM12 17.5V14l-3-3 4-3 2 3h2"/>',
+  replay: '<path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/>',
   info: '<circle cx="12" cy="12" r="9.5"/><path d="M12 11v5.5M12 7.6v.1"/>', trash: '<path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"/>',
   rain: '<path d="M20 16.6A5 5 0 0 0 18 7h-1.3A8 8 0 1 0 4 15.3"/><path d="M8 19v2M8 13v2M16 19v2M16 13v2M12 21v2M12 15v2"/>',
 };
@@ -309,7 +310,7 @@ export function tapGan(host, opt) {
        <div class="t-tt"><span>${esc(lb.ten)}</span><button class="t-info${S.how[day + id] ? ' on' : ''}" data-info="${day + id}" title="Cách tập">${ic('info')}</button></div><span class="t-tg">${esc(tg)}</span><span class="t-car">${ic('down', 'width:16px;height:16px')}</span></div>
       <div class="t-exb"><div><div class="t-exin">
        <div class="t-how${S.how[day + id] ? ' on' : ''}" data-how="${day + id}"><div><div class="t-howin">
-        ${API && API.clip && CLIP[id] ? `<video class="t-clip" data-clip="${CLIP[id]}" muted loop playsinline preload="none"></video>` : `<div class="t-fig" data-fig="${id}"></div>`}
+        ${API && API.clip && CLIP[id] ? `<div class="t-clipw"><video class="t-clip" data-clip="${CLIP[id]}" muted playsinline preload="none"></video><button class="t-replay" data-replay title="Xem lại">${ic('replay')}</button></div>` : `<div class="t-fig" data-fig="${id}"></div>`}
         <ol>${(lb.cach || []).map((x) => `<li>${esc(x)}</li>`).join('')}</ol>
         ${lb.de ? `<div style="margin-top:6px"><b>Bản dễ:</b> ${esc(lb.de)}</div>` : ''}
         ${lb.loi && lb.loi.length ? `<div class="t-bad"><b>Lỗi hay gặp:</b> ${esc(lb.loi.join(' '))}</div>` : ''}</div></div></div>
@@ -595,7 +596,9 @@ export function tapGan(host, opt) {
       const m = (lb.loai === 'tick' ? n : Math.max(n, a.length)) + 1; while (a.length < m) a.push([]); (L.sn || (L.sn = {}))[id] = m; doi(); body(); return; }
     const dl = T.closest('[data-del]'); if (dl) { e.stopPropagation(); xoaHiep(dl.dataset.del); return; }
     /* (v2.8.0) nút ⓘ cạnh tên bài: mở/đóng hướng dẫn ngay dưới tiêu đề */
+    const rp = T.closest('[data-replay]'); if (rp) { e.stopPropagation(); const hb = rp.closest('[data-how]'); if (hb) { LUOT[hb.dataset.how] = 0; const v = hb.querySelector('video.t-clip'); if (v && v.src) v.currentTime = 0; chayClip(hb); } return; }
     const inf = T.closest('[data-info]'); if (inf) { e.stopPropagation(); const k = inf.dataset.info, on = !S.how[k]; S.how[k] = on; inf.classList.toggle('on', on);
+      if (on) LUOT[k] = 0;   /* mở lại ⓘ = muốn xem ⇒ phát lại 3 lượt */
       const hb = root.querySelector(`.t-how[data-how="${k}"]`); if (hb) { hb.classList.toggle('on', on); chayClip(hb); } return; }
     const tg = T.closest('[data-tog]'); if (tg && !T.closest('input')) {
       /* (v2.8.0) mở 1 bài ⇒ các bài khác của ngày đó gập lại */
@@ -697,14 +700,24 @@ export function tapGan(host, opt) {
   root.addEventListener('click', onClick); root.addEventListener('keydown', onKey); root.addEventListener('change', onChange); root.addEventListener('input', onInput);
   /* (v2.5.0) nhớ mục "Cách tập" đang mở (khung vẽ lại không đóng mất) + hình động chỉ chạy ở mục đang mở */
   /* (v2.7.0) clip hướng dẫn: gắn nguồn lúc mở lần đầu, đóng thì dừng · (v2.8.0) khối hướng dẫn = .t-how.on (không còn <details>) */
+  /* (v2.10.0) thầy chốt: clip phát 3 LƯỢT rồi dừng (đỡ nóng máy), chạm nút ↻ để xem lại. Đếm theo bài-ngày (LUOT), vẽ lại khối không đếm lại. */
+  const LUOT = {};
   function chayClip(d) {
     const v = d.querySelector('video.t-clip'); if (!v) return;
+    const k = d.dataset.how, w = v.parentElement;
     const mo = () => d.classList.contains('on') && d.closest('.t-ex.op');
+    const con = () => (LUOT[k] || 0) < 3;
+    if (!v.dataset.gan) {
+      v.dataset.gan = 1;
+      v.addEventListener('ended', () => { LUOT[k] = (LUOT[k] || 0) + 1; if (con() && mo()) { v.currentTime = 0; v.play().catch(() => {}); } else w.classList.add('xong'); });
+    }
+    w.classList.toggle('xong', !con());
     if (!mo()) { v.pause(); return; }
+    if (!con()) { v.pause(); if (v.src || v.dataset.dang) return; }   /* đã đủ 3 lượt: chỉ tải để hiện khung hình, không phát */
     if (v.src) { v.play().catch(() => {}); return; }
     if (v.dataset.dang) return; v.dataset.dang = 1;
-    API.clip(v.dataset.clip).then((u) => { v.src = u; if (mo()) v.play().catch(() => {}); },
-      () => { v.removeAttribute('data-dang'); v.classList.add('loi'); });
+    API.clip(v.dataset.clip).then((u) => { v.src = u; if (mo() && con()) v.play().catch(() => {}); },
+      () => { v.removeAttribute('data-dang'); v.classList.add('loi'); w.classList.add('loi'); });
   }
   const dungHinh = chayHinh(root);
   const onRs = () => pill(); addEventListener('resize', onRs);

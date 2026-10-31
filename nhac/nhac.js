@@ -176,7 +176,9 @@ function buoc(n) {
 }
 AU.addEventListener('ended', () => { if (AU.src === LANG) return; if (Q.rep === 'mot') { AU.currentTime = 0; AU.play().catch(() => {}); } else buoc(1); });
 ['play', 'pause'].forEach((e) => AU.addEventListener(e, () => { ve(); phien(); ghiNho(); }));
-AU.addEventListener('timeupdate', () => { tienDo(); if (Math.floor(AU.currentTime) % 5 === 0) ghiNho(); });
+/* (v2.10.0) đỡ nóng máy: timeupdate bắn ~4 lần/giây ⇒ chỉ làm việc khi sang GIÂY mới; ghi nhớ đúng 1 lần mỗi 5 giây (trước ~4 lần liền) */
+let _gTd = -1;
+AU.addEventListener('timeupdate', () => { const g = Math.floor(AU.currentTime); if (g === _gTd) return; _gTd = g; tienDo(); if (g % 5 === 0) ghiNho(); });
 AU.addEventListener('loadedmetadata', () => { if (AU.src === LANG) return; if (Q.tTiep && AU.currentTime < 1) { AU.currentTime = Q.tTiep; Q.tTiep = 0; } tienDo(); });
 AU.addEventListener('error', () => { if (AU.src === LANG || !AU.src) return; if (Q.id && API) API.toast(mang ? 'Không phát được bài này' : 'Mất mạng — bài này chưa tải về máy'); });
 /* màn hình khoá / tai nghe: Media Session */
@@ -248,7 +250,7 @@ async function themNhac(files) {
 function ve() { veThanh(); veFull(); veTrang(); }
 function tienDo() {
   const d = AU.duration || (BAI(Q.id) || {}).dai || 0, x = d ? Math.min(100, 100 * AU.currentTime / d) : 0;
-  if (THANH) { const g = THANH.querySelector('.n-pg'); if (g) g.style.width = x + '%'; }
+  if (THANH) { const g = THANH.querySelector('.n-pg'); if (g) g.style.transform = `scaleX(${x / 100})`; }   /* transform: không tính lại bố cục */
   if (FULL && V.full) { const s = FULL.querySelector('.n-sl'); if (s && !s.matches(':active')) { s.max = Math.floor(d); s.value = Math.floor(AU.currentTime); s.style.setProperty('--x', x + '%'); }
     const a = FULL.querySelector('.n-t1'); if (a) a.textContent = mmss(AU.currentTime); const b = FULL.querySelector('.n-t2'); if (b) b.textContent = mmss(d); }
 }

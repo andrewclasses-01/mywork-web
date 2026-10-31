@@ -144,7 +144,8 @@
 .n-mp:hover{background:var(--m-bg2)}
 .n-mp .n-art{width:28px;height:28px;border-radius:50%}
 .n-mp .n-art svg.i{width:15px;height:15px}
-.n-mp.on .n-art{animation:n-quay 8s linear infinite}
+/* (v2.10.0) thầy chốt: đĩa ĐỨNG YÊN (quay mãi bắt màn hình vẽ lại liên tục ⇒ nóng máy) */
+.n-mp.on .n-art{animation:none}
 @keyframes n-quay{to{transform:rotate(360deg)}}
 .n-mp .n-tt{font-size:13px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .n-mp .n-tt span{display:inline;font-size:13px;color:var(--m-mu);font-weight:600}
@@ -152,7 +153,7 @@
 .n-mp button svg.i{width:16px;height:16px}
 .n-mp button.pl{background:var(--m-pl);color:#fff}
 .n-pgw{position:absolute;left:14px;right:14px;bottom:0;height:2px}
-.n-mp .n-pg{position:static;display:block;height:100%;width:0;border-radius:2px;background:var(--m-ac)}
+.n-mp .n-pg{position:static;display:block;height:100%;width:100%;border-radius:2px;background:var(--m-ac);transform:scaleX(0);transform-origin:left center;transition:none}
 /* máy tính: hàng trên cùng chỉ hiện khi đang có bài, thanh canh phải */
 .frame.cophat .app:not(.phone) .ptop{display:flex;align-items:center;justify-content:flex-end;padding:10px 18px 0;flex:none}
 .app:not(.phone) .ptop>button{display:none}
